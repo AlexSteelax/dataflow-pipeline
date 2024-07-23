@@ -1,0 +1,59 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34309.116
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{140DA8AF-B85A-4772-B00D-AEB725DE02EB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extras", "extras", "{C5B58355-49DB-4209-B1B1-08D43CB264E3}"
+	ProjectSection(SolutionItems) = preProject
+		GitVersion.yml = GitVersion.yml
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{19C26739-0DB6-4EFA-A104-71ED74B83473}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8DE90B3E-24A0-443D-95C2-EEA1EFB87C3F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Steelax.DataflowPipeline", "src\Steelax.DataflowPipeline\Steelax.DataflowPipeline.csproj", "{9E07B0F8-63D0-46BE-B8D2-2DD229BAFC3A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Steelax.DataFlowPipeline.UnitTests", "tests\Steelax.DataFlowPipeline.UnitTests\Steelax.DataFlowPipeline.UnitTests.csproj", "{FF7CD13A-EE45-44B0-BA52-BCCC0890E5DE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{0B078B25-8D2C-4B75-A3B0-EA8411C1A04A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipelineBenchmarkSuite", "benchmarks\PipelineBenchmarkSuite\PipelineBenchmarkSuite.csproj", "{DBB9E7BE-DB68-4007-8922-E9FB7DC21FBA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{140DA8AF-B85A-4772-B00D-AEB725DE02EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{140DA8AF-B85A-4772-B00D-AEB725DE02EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E07B0F8-63D0-46BE-B8D2-2DD229BAFC3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E07B0F8-63D0-46BE-B8D2-2DD229BAFC3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E07B0F8-63D0-46BE-B8D2-2DD229BAFC3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E07B0F8-63D0-46BE-B8D2-2DD229BAFC3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF7CD13A-EE45-44B0-BA52-BCCC0890E5DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF7CD13A-EE45-44B0-BA52-BCCC0890E5DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF7CD13A-EE45-44B0-BA52-BCCC0890E5DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF7CD13A-EE45-44B0-BA52-BCCC0890E5DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBB9E7BE-DB68-4007-8922-E9FB7DC21FBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBB9E7BE-DB68-4007-8922-E9FB7DC21FBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBB9E7BE-DB68-4007-8922-E9FB7DC21FBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBB9E7BE-DB68-4007-8922-E9FB7DC21FBA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9E07B0F8-63D0-46BE-B8D2-2DD229BAFC3A} = {19C26739-0DB6-4EFA-A104-71ED74B83473}
+		{FF7CD13A-EE45-44B0-BA52-BCCC0890E5DE} = {8DE90B3E-24A0-443D-95C2-EEA1EFB87C3F}
+		{DBB9E7BE-DB68-4007-8922-E9FB7DC21FBA} = {0B078B25-8D2C-4B75-A3B0-EA8411C1A04A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {49383F29-3C46-4B19-9899-42E27D25DE4C}
+	EndGlobalSection
+EndGlobal
