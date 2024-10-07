@@ -1,4 +1,4 @@
-# easy-roslyn
+# dataflow-pipeline
 [![Steelax.DataflowPipeline](https://img.shields.io/nuget/v/Steelax.DataflowPipeline.svg)](https://www.nuget.org/packages/Steelax.DataflowPipeline) [![Steelax.DataflowPipeline](https://img.shields.io/nuget/dt/Steelax.DataflowPipeline.svg)](https://www.nuget.org/packages/Steelax.DataflowPipeline/)
 
 DataflowPipeline is a standard library that allows you to create a Pipeline which you can feed data into and process it by adding Dataflow blocks to it.
