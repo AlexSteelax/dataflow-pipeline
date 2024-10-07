@@ -65,7 +65,8 @@ class Build : NukeBuild
                 .SetFileVersion(GitVersion.AssemblySemFileVer)
                 .SetInformationalVersion(GitVersion.InformationalVersion)
                 .EnableNoRestore()
-                .DisableProcessLogOutput());
+                .DisableProcessLogOutput()
+            );
         });
 
     internal Target Pack => _ => _
