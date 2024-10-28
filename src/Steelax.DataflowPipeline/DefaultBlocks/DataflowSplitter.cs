@@ -15,15 +15,26 @@ internal class DataflowSplitter<TValue>(SplitHandler<TValue> splitHandler,  para
 
         var index = 0;
 
+        var writers = new ValueTask[channels.Length];
+
         try
         {
             while (await enumerator.MoveNextAsync().ConfigureAwait(false))
             {
                 var splitIndex = splitHandler(enumerator.Current, index) % channels.Length;
-                
-                await channels[splitIndex].WriteAsync(enumerator.Current, cancellationToken).ConfigureAwait(false);
+
+                if (!writers[splitIndex].IsCompletedSuccessfully)
+                    await writers[splitIndex].ConfigureAwait(false);
+                    
+                writers[splitIndex] = channels[splitIndex].WriteAsync(enumerator.Current, cancellationToken);
                 
                 index = Next(index);
+            }
+
+            for (var i = 0; i < writers.Length; i++)
+            {
+                if (!writers[i].IsCompletedSuccessfully)
+                    await writers[i].ConfigureAwait(false);
             }
         }
         finally
