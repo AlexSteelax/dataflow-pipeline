@@ -183,12 +183,49 @@ public static partial class DataflowTaskExtensions
     /// </summary>
     /// <param name="instance"></param>
     /// <param name="splitHandler"></param>
-    /// <param name="configurators"></param>
+    /// <param name="count"></param>
+    /// <param name="handler"></param>
     /// <typeparam name="TInput"></typeparam>
     /// <returns></returns>
-    public static DataflowTask Split<TInput>(this DataflowTask<TInput> instance, SplitHandler<TInput> splitHandler, params Func<ConfiguredDataflowTask<TInput>, DataflowTask>[] configurators)
+    public static DataflowTask Split<TInput>(this DataflowTask<TInput> instance, SplitHandler<TInput> splitHandler, int count, Func<ConfiguredDataflowTask<TInput>, DataflowTask> handler)
     {
-        var items = configurators
+        var items = Enumerable
+            .Range(0, count)
+            .Select(s =>
+            {
+                var configuredDataflow = new ConfiguredDataflowTask<TInput, TInput>(channel =>
+                    channel.Reader.UseAsDataflowSource());
+
+                var dataflow = handler(configuredDataflow);
+
+                return new
+                {
+                    // ReSharper disable once RedundantAnonymousTypePropertyName
+                    Writer = configuredDataflow.GetConfiguredChannel().Writer,
+                    Dataflow = dataflow
+                };
+            })
+            .ToList();
+        
+        var writers = items.Select(s => s.Writer).ToArray();
+        var dataflows = items.Select(s => s.Dataflow).ToArray();
+       
+        var splitter = new DataflowSplitter<TInput>(splitHandler, writers);
+
+        return instance.EndWith(splitter).Attach(dataflows);
+    }
+    
+    /// <summary>
+    /// Passing data to each dataflow task in a round-robin fashion
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <param name="splitHandler"></param>
+    /// <param name="handlers"></param>
+    /// <typeparam name="TInput"></typeparam>
+    /// <returns></returns>
+    public static DataflowTask Split<TInput>(this DataflowTask<TInput> instance, SplitHandler<TInput> splitHandler, params Func<ConfiguredDataflowTask<TInput>, DataflowTask>[] handlers)
+    {
+        var items = handlers
             .Select(handler =>
             {
                 var configuredDataflow = new ConfiguredDataflowTask<TInput, TInput>(channel =>
@@ -217,12 +254,22 @@ public static partial class DataflowTaskExtensions
     /// Passing data to each dataflow task in a round-robin fashion
     /// </summary>
     /// <param name="instance"></param>
-    /// <param name="configurators"></param>
+    /// <param name="count"></param>
+    /// <param name="handler"></param>
     /// <typeparam name="TInput"></typeparam>
     /// <returns></returns>
-    public static DataflowTask Split<TInput>(this DataflowTask<TInput> instance,
-        params Func<ConfiguredDataflowTask<TInput>, DataflowTask>[] configurators)
-        => instance.Split((_, i) => i, configurators);
+    public static DataflowTask Split<TInput>(this DataflowTask<TInput> instance, int count, Func<ConfiguredDataflowTask<TInput>, DataflowTask> handler)
+        => instance.Split((_, i) => i, count, handler);
+    
+    /// <summary>
+    /// Passing data to each dataflow task in a round-robin fashion
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <param name="handlers"></param>
+    /// <typeparam name="TInput"></typeparam>
+    /// <returns></returns>
+    public static DataflowTask Split<TInput>(this DataflowTask<TInput> instance, params Func<ConfiguredDataflowTask<TInput>, DataflowTask>[] handlers)
+        => instance.Split((_, i) => i, handlers);
     
     /// <summary>
     /// Passing data to each dataflow task in a round-robin fashion
@@ -277,6 +324,64 @@ public static partial class DataflowTaskExtensions
     /// <returns></returns>
     public static DataflowTask<TOutput> Split<TInput, TOutput>(this DataflowTask<TInput> instance, params Func<ConfiguredDataflowTask<TInput>, DataflowTask<TOutput>>[] configurators)
         => instance.Split((_, i) => i, configurators);
+    
+    
+    /// <summary>
+    /// Passing data to each dataflow task in a round-robin fashion
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <param name="splitHandler"></param>
+    /// <param name="count"></param>
+    /// <param name="handler"></param>
+    /// <typeparam name="TInput"></typeparam>
+    /// <typeparam name="TOutput"></typeparam>
+    /// <returns></returns>
+    public static DataflowTask<TOutput> Split<TInput, TOutput>(this DataflowTask<TInput> instance, SplitHandler<TInput> splitHandler, int count, Func<ConfiguredDataflowTask<TInput>, DataflowTask<TOutput>> handler)
+    {
+        var items = Enumerable
+            .Range(0, count)
+            .Select(_ =>
+            {
+                var configuredDataflow = new ConfiguredDataflowTask<TInput, TInput>(channel =>
+                    channel.Reader.UseAsDataflowSource());
+
+                var dataflow = handler(configuredDataflow);
+
+                return new
+                {
+                    // ReSharper disable once RedundantAnonymousTypePropertyName
+                    Writer = configuredDataflow.GetConfiguredChannel().Writer,
+                    Dataflow = dataflow
+                };
+            })
+            .ToList();
+
+        var writers = items.Select(s => s.Writer).ToArray();
+        
+        var splitter = new DataflowSplitter<TInput>(splitHandler, writers);
+
+        instance.AddTaskHandler(splitter.HandleAsync);
+        return instance.Next(token =>
+        {
+            var sources = items
+                .Select(s => s.Dataflow.SourceHandler(token))
+                .ToArray();
+
+            return AsyncEnumerable.MergeAsync(sources, cancellationToken: token);
+        });
+    }
+
+    /// <summary>
+    /// Passing data to each dataflow task in a round-robin fashion
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <param name="count"></param>
+    /// <param name="handler"></param>
+    /// <typeparam name="TInput"></typeparam>
+    /// <typeparam name="TOutput"></typeparam>
+    /// <returns></returns>
+    public static DataflowTask<TOutput> Split<TInput, TOutput>(this DataflowTask<TInput> instance, int count, Func<ConfiguredDataflowTask<TInput>, DataflowTask<TOutput>> handler)
+        => instance.Split((_, i) => i, count, handler);
     
     /// <summary>
     /// Pack data into batch
