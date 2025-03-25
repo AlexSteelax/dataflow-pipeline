@@ -14,37 +14,38 @@ internal class DataflowPeriodic<TValue>(TimeSpan period, bool reset)
 
         var state = new State();
         
-        await using var timer = new Timer(static state => ((State)state!).Change(OperationState.Timeout), state, TimeSpan.Zero, period);
+        await using var timer = new Timer(static state => ((State)state!).Change(OperationState.Timeout), state, period, period);
 
         ValueTask<bool> nextResultTask = default;
-        
+
         while (!cancellationToken.IsCancellationRequested)
+        {
             switch ((OperationState)state)
             {
                 case OperationState.Next:
                     state.Change(OperationState.Waiting);
                     
-                    #pragma warning disable CA2012
+#pragma warning disable CA2012
                     nextResultTask = enumerator.MoveNextAsync();
-                    #pragma warning restore CA2012
+#pragma warning restore CA2012
                     nextResultTask.GetAwaiter().OnCompleted(() => state.Change(OperationState.ResultCompleted));
 
                     if (reset)
-                        timer.Change(TimeSpan.Zero, period);
+                        timer.Change(period, period);
                     break;
                 case OperationState.Waiting:
                     await Task.Yield();
                     break;
                 case OperationState.ResultCompleted:
-                    switch (nextResultTask.Result)
+                    if (nextResultTask.Result)
                     {
-                        case true:
-                            var result = enumerator.Current;
-                            state.Change(OperationState.Next);
-                            yield return new TimedResult<TValue>(result);
-                            break;
-                        case false:
-                            yield break;
+                        var result = enumerator.Current;
+                        state.Change(OperationState.Next);
+                        yield return new TimedResult<TValue>(result);
+                    }
+                    else
+                    {
+                        yield break;
                     }
                     break;
                 case OperationState.Timeout:
@@ -56,6 +57,7 @@ internal class DataflowPeriodic<TValue>(TimeSpan period, bool reset)
                     throw new ArgumentOutOfRangeException();
 #pragma warning restore CA2208
             }
+        }
     }
     
     private sealed class State

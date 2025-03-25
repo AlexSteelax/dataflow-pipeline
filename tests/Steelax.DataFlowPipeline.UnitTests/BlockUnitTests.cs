@@ -15,31 +15,33 @@ public class BlockUnitTests
         }
     }
     
-    //[Theory(Skip = "Not implemented yet")]
-    // [Theory]
-    // [InlineData(100)]
-    // public async Task TimeoutInterrupter_NoTimeout_Success(short size)
-    // {
-    //     var block = new DataflowPeriodic<short>(Timeout.InfiniteTimeSpan);
-    //     var values = CreateSequence(size, TimeSpan.FromMilliseconds(10));
-    //
-    //     var result = await block.HandleAsync(values, CancellationToken.None).ToListAsync();
-    //     
-    //     Assert.NotEmpty(result);
-    //     Assert.Equal(size, result.Count);
-    // }
+    [Theory]
+    [InlineData(100)]
+    public async Task Periodic_NoTimeout_Success(int size)
+    {
+        var block = new DataflowPeriodic<int>(TimeSpan.FromDays(1), true);
+        var expected = Enumerable.Range(0, size).ToList();
+        
+        var result = await block.HandleAsync(expected.ToAsyncEnumerable(), CancellationToken.None).ToListAsync();
+        
+        Assert.NotEmpty(result);
+        Assert.DoesNotContain(result, s => s.Empty);
+        Assert.Equivalent(expected, result.Select(s => s.Value));
+    }
     
-    //[Theory(Skip = "Not implemented yet")]
-    // [Theory]
-    // [InlineData(5)]
-    // public async Task TimeoutInterrupter_Timeout_Success(short size)
-    // {
-    //     var block = new DataflowPeriodic<short>(TimeSpan.FromMilliseconds(5));
-    //     var values = CreateSequence(size, TimeSpan.FromMilliseconds(10));
-    //
-    //     var result = await block.HandleAsync(values, CancellationToken.None).ToListAsync();
-    //     
-    //     Assert.NotEmpty(result);
-    //     Assert.Equal(size, result.Count);
-    // }
+    [Theory]
+    [InlineData(5)]
+    public async Task Periodic_Success(int size)
+    {
+        var block = new DataflowPeriodic<int>(TimeSpan.FromMilliseconds(5), true);
+        var values = CreateSequence(size, TimeSpan.FromMilliseconds(10));
+        var expected = Enumerable.Range(0, size).ToList();
+    
+        var result = await block.HandleAsync(values, CancellationToken.None).ToListAsync();
+        
+        Assert.NotEmpty(result);
+        Assert.Contains(result, s => s.Empty);
+        Assert.Contains(result, s => !s.Empty);
+        Assert.Equivalent(expected, result.Where(s => !s.Empty).Select(s => s.Value));
+    }
 }

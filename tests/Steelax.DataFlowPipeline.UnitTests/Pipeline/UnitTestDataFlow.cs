@@ -31,7 +31,7 @@ public class UnitTestDataFlow
 
         await actual.ToAsyncEnumerable()
             .UseAsDataflowSource()
-            .Batch(2, TimeSpan.FromMilliseconds(5))
+            .Batch(2, TimeSpan.FromSeconds(5))
             .EndWith(dataflow)
             .InvokeAsync(CancellationToken.None);
 
