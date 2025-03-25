@@ -1,5 +1,6 @@
 ﻿using Steelax.DataflowPipeline.Abstractions;
 using Steelax.DataflowPipeline.Abstractions.Common;
+using Steelax.DataflowPipeline.Common;
 using Steelax.DataflowPipeline.Common.Delegates;
 using Steelax.DataflowPipeline.DefaultBlocks;
 using Steelax.DataflowPipeline.Extensions;
@@ -392,7 +393,7 @@ public static partial class DataflowTaskExtensions
     /// <returns></returns>
     public static DataflowTask<TInput[]> Batch<TInput>(this DataflowTask<TInput> instance, int size)
     {
-        return instance.Then(new DataflowGreedyBatch<TInput>(size));
+        return instance.Then<TInput, TInput[]>(new DataflowBatch<TInput>(size));
     }
     
     /// <summary>
@@ -403,10 +404,28 @@ public static partial class DataflowTaskExtensions
     /// <param name="timeout"></param>
     /// <typeparam name="TInput"></typeparam>
     /// <returns></returns>
-    public static ConfiguredDataflowTask<TInput[]> Batch<TInput>(this DataflowTask<TInput> instance, int size, TimeSpan timeout)
+    public static DataflowTask<TInput[]> Batch<TInput>(this DataflowTask<TInput> instance, int size, TimeSpan timeout)
     {
-        return new ConfiguredDataflowTask<TInput[], TInput>(channel =>
-            instance.Then(new DataflowAggressiveBatch<TInput>(size, timeout, channel)));
+        ArgumentOutOfRangeException.ThrowIfZero(timeout.Ticks, nameof(timeout));
+        
+        return instance
+            .Then(new DataflowPeriodic<TInput>(timeout, true))
+            .Then<TimedResult<TInput>, TInput[]>(new DataflowBatch<TInput>(size));
+    }
+
+    /// <summary>
+    /// Interrupt flow with interval
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <param name="period"></param>
+    /// <param name="reset"></param>
+    /// <typeparam name="TInput"></typeparam>
+    /// <returns></returns>
+    public static DataflowTask<TimedResult<TInput>> Periodic<TInput>(this DataflowTask<TInput> instance, TimeSpan period, bool reset)
+    {
+        ArgumentOutOfRangeException.ThrowIfZero(period.Ticks, nameof(period));
+
+        return instance.Then(new DataflowPeriodic<TInput>(period, reset));
     }
     
     /// <summary>

@@ -11,21 +11,21 @@ internal class DataflowBroadcast<TValue>(params ChannelWriter<TValue>[] channels
     {
         await using var enumerator = source.GetAsyncEnumerator(cancellationToken);
 
-        var tasks = new ConfiguredValueTaskAwaitable[channels.Length];
+        var tasks = new ValueTask[channels.Length];
         
         try
         {
             while (await enumerator.MoveNextAsync().ConfigureAwait(false))
             {
-                for (var i = 0; i < tasks.Length; i++)
+                for (var i = tasks.Length; i-- > 0;)
                 {
-#pragma warning disable CA2012
-                    tasks[i] = channels[i].WriteAsync(enumerator.Current, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2012
+                    #pragma warning disable CA2012
+                    tasks[i] = channels[i].WriteAsync(enumerator.Current, cancellationToken);
+                    #pragma warning restore CA2012
                 }
-                
-                foreach (var task in tasks)
-                    await task;
+
+                for (var i = tasks.Length; i-- > 0;)
+                    await tasks[i].ConfigureAwait(false);
             }
         }
         finally

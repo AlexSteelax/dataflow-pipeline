@@ -15,7 +15,7 @@ public class UnitTestDataFlow
             .UseAsDataflowSource()
             .Batch(2)
             .EndWith(dataflow)
-            .InvokeAsync(default);
+            .InvokeAsync(CancellationToken.None);
 
         var real = await dataflow.ReadAllAsync();
         
@@ -31,9 +31,9 @@ public class UnitTestDataFlow
 
         await actual.ToAsyncEnumerable()
             .UseAsDataflowSource()
-            .Batch(2, TimeSpan.FromMilliseconds(5)).AsUnbounded()
+            .Batch(2, TimeSpan.FromMilliseconds(5))
             .EndWith(dataflow)
-            .InvokeAsync(default);
+            .InvokeAsync(CancellationToken.None);
 
         var real = await dataflow.ReadAllAsync();
         
@@ -51,7 +51,7 @@ public class UnitTestDataFlow
             .UseAsDataflowSource()
             .Buffer().AsBounded(2)
             .EndWith(dataflow)
-            .InvokeAsync(default);
+            .InvokeAsync(CancellationToken.None);
 
         var real = await dataflow.ReadAllAsync();
         
@@ -71,7 +71,7 @@ public class UnitTestDataFlow
                 s => s.AsUnbounded(),
                 s => s.AsUnbounded())
             .EndWith(dataflow)
-            .InvokeAsync(default);
+            .InvokeAsync(CancellationToken.None);
 
         var real = await dataflow.ReadAllAsync();
         
@@ -91,7 +91,7 @@ public class UnitTestDataFlow
             .Broadcast(
                 s => s.AsUnbounded().EndWith(dataflow1),
                 s => s.AsUnbounded().EndWith(dataflow2))
-            .InvokeAsync(default);
+            .InvokeAsync(CancellationToken.None);
 
         var real1 = await dataflow1.ReadAllAsync();
         var real2 = await dataflow2.ReadAllAsync();
@@ -114,7 +114,7 @@ public class UnitTestDataFlow
                 (_, i) => i % 2,
                 s => s.AsUnbounded().EndWith(dataflow1),
                 s => s.AsUnbounded().EndWith(dataflow2))
-            .InvokeAsync(default);
+            .InvokeAsync(CancellationToken.None);
 
         var real1 = await dataflow1.ReadAllAsync();
         var real2 = await dataflow2.ReadAllAsync();
@@ -134,7 +134,7 @@ public class UnitTestDataFlow
             .UseAsDataflowSource()
             .Union(actual.ToAsyncEnumerable().UseAsDataflowSource())
             .EndWith(dataflow)
-            .InvokeAsync(default);
+            .InvokeAsync(CancellationToken.None);
 
         var real = await dataflow.ReadAllAsync();
         
