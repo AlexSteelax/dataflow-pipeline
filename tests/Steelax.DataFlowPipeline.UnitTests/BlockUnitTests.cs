@@ -25,7 +25,7 @@ public class BlockUnitTests
         var result = await block.HandleAsync(expected.ToAsyncEnumerable(), CancellationToken.None).ToListAsync();
         
         Assert.NotEmpty(result);
-        Assert.DoesNotContain(result, s => s.Empty);
+        Assert.DoesNotContain(result, s => s.Expired);
         Assert.Equivalent(expected, result.Select(s => s.Value));
     }
     
@@ -40,8 +40,8 @@ public class BlockUnitTests
         var result = await block.HandleAsync(values, CancellationToken.None).ToListAsync();
         
         Assert.NotEmpty(result);
-        Assert.Contains(result, s => s.Empty);
-        Assert.Contains(result, s => !s.Empty);
-        Assert.Equivalent(expected, result.Where(s => !s.Empty).Select(s => s.Value));
+        Assert.Contains(result, s => s.Expired);
+        Assert.Contains(result, s => !s.Expired);
+        Assert.Equivalent(expected, result.Where(s => !s.Expired).Select(s => s.Value));
     }
 }

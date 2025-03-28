@@ -85,7 +85,7 @@ internal sealed class DataflowBatch<TValue>(int size) :
 
             var result = enumerator.Current;
 
-            if (result.Empty)
+            if (result.Expired)
             {
                 _ = packer.TryClearAndGet(out buffer);
                 yield return buffer ?? [];
