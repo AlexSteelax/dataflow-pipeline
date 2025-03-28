@@ -439,4 +439,30 @@ public static partial class DataflowTaskExtensions
         return new ConfiguredDataflowTask<TInput, TInput>(channel =>
             instance.Then(new DataflowBuffer<TInput>(channel)));
     }
+
+    /// <summary>
+    /// Transform input flow into output
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <param name="mapHandler"></param>
+    /// <typeparam name="TInput"></typeparam>
+    /// <typeparam name="TOutput"></typeparam>
+    /// <returns></returns>
+    public static DataflowTask<TOutput> Transform<TInput, TOutput>(this DataflowTask<TInput> instance, Func<TInput, TOutput> mapHandler)
+    {
+        return instance.Then<TInput, TOutput>(new DataflowTransform<TInput, TOutput>(mapHandler));
+    }
+    
+    /// <summary>
+    /// Transform input flow into output
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <param name="mapHandler"></param>
+    /// <typeparam name="TInput"></typeparam>
+    /// <typeparam name="TOutput"></typeparam>
+    /// <returns></returns>
+    public static DataflowTask<TOutput> Transform<TInput, TOutput>(this DataflowTask<TimedResult<TInput>> instance, Func<TInput, TOutput> mapHandler)
+    {
+        return instance.Then<TimedResult<TInput>, TOutput>(new DataflowTransform<TInput, TOutput>(mapHandler));
+    }
 }
