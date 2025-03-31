@@ -1,8 +1,6 @@
-using Steelax.DataflowPipeline.Common;
-
 namespace Steelax.DataFlowPipeline.UnitTests.Common;
 
-public class UnitTestPacker
+public class PackerUnitTests
 {
     [Fact]
     public void TestAdd()
@@ -16,12 +14,13 @@ public class UnitTestPacker
         foreach (var item in items.SkipLast(1))
             Assert.False(buffer.TryAddAndGet(item, out _));
         
-        Assert.True(buffer.TryAddAndGet(items.Last(), out var package));
+        Assert.True(buffer.TryAddAndGet(items.Last(), out var batch));
 
-        Assert.NotNull(package);
-        Assert.NotEmpty(package);
+        Assert.False(batch.Span.IsEmpty);
 
-        Assert.Equivalent(items, package);
+        Assert.Equal(items, batch.Span.ToArray());
+        
+        batch.Dispose();
     }
 
     [Fact]
@@ -29,12 +28,12 @@ public class UnitTestPacker
     {
         var buffer = new Packer<int>(1);
 
-        Assert.True(buffer.TryAddAndGet(1, out var package));
-        Assert.Equivalent(new[] { 1 }, package);
+        Assert.True(buffer.TryAddAndGet(1, out var batch));
+        Assert.Equal(new[] { 1 }, batch.Span.ToArray());
         Assert.True(buffer.IsEmpty);
 
-        Assert.True(buffer.TryAddAndGet(2, out package));
-        Assert.Equivalent(new[] { 2 }, package);
+        Assert.True(buffer.TryAddAndGet(2, out batch));
+        Assert.Equal(new[] { 2 }, batch.Span.ToArray());
         Assert.True(buffer.IsEmpty);
     }
 
@@ -43,9 +42,9 @@ public class UnitTestPacker
     {
         var buffer = new Packer<int>(2);
 
-        Assert.False(buffer.TryAddAndGet(1, out var ret));
-        Assert.True(buffer.TryAddAndGet(2, out ret));
-        Assert.Equivalent(new[] { 1, 2 }, ret);
+        Assert.False(buffer.TryAddAndGet(1, out var batch));
+        Assert.True(buffer.TryAddAndGet(2, out batch));
+        Assert.Equal(new[] { 1, 2 }, batch.Span.ToArray());
         Assert.True(buffer.IsEmpty);
     }
 }

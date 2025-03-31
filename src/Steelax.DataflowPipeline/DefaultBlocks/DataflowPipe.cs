@@ -3,8 +3,8 @@ using Steelax.DataflowPipeline.Abstractions;
 
 namespace Steelax.DataflowPipeline.DefaultBlocks;
 
-internal sealed class DataflowTransform<TInput, TOutput>(Func<TInput, TOutput> mapper, Func<TInput, bool>? filter = null) :
-    IDataflowTransform<TInput, TOutput>
+internal sealed class DataflowPipe<TInput, TOutput>(Func<TInput, TOutput> mapper, Func<TInput, bool>? filter = null) :
+    IDataflowPipe<TInput, TOutput>
 {
     public async IAsyncEnumerable<TOutput> HandleAsync(IAsyncEnumerable<TInput> source, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -16,7 +16,7 @@ internal sealed class DataflowTransform<TInput, TOutput>(Func<TInput, TOutput> m
 
             try
             {
-                moveNext = await enumerator.MoveNextAsync();
+                moveNext = await enumerator.MoveNextAsync().ConfigureAwait(false);
             }
             catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
             {

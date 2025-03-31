@@ -1,7 +1,7 @@
 ﻿using System.Threading.Channels;
 using Steelax.DataflowPipeline.Abstractions;
 
-namespace Steelax.DataFlowPipeline.UnitTests;
+namespace Steelax.DataFlowPipeline.UnitTests.Mocks;
 
 public class DataflowChannelWriter<TInput> :
     IDataflowAction<TInput>
@@ -15,15 +15,11 @@ public class DataflowChannelWriter<TInput> :
     public ValueTask<TInput[]> ReadAllAsync(CancellationToken cancellationToken = default) =>
         _channel.Reader.ReadAllAsync(cancellationToken).ToArrayAsync(cancellationToken);
 
-    public async Task HandleAsync(IAsyncEnumerable<TInput> stream, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(IAsyncEnumerable<TInput> source, CancellationToken cancellationToken = default)
     {
-        await using var enumerator = stream.GetAsyncEnumerator(cancellationToken);
-
-        while (await enumerator.MoveNextAsync().ConfigureAwait(false))
-        {
-            await _channel.Writer.WriteAsync(enumerator.Current, cancellationToken);
-        }
-
+        await foreach(var item in source.WithCancellation(cancellationToken))
+            await _channel.Writer.WriteAsync(item, cancellationToken);
+        
         _channel.Writer.TryComplete();
     }
 }

@@ -72,7 +72,7 @@ public static partial class DataflowTaskExtensions
             var streams = input
                 .Select(s => s.ReadAllAsync(token))
                 .ToArray();
-                
+            
             return AsyncEnumerable.MergeAsync(streams, cancellationToken: token);
         });
     }

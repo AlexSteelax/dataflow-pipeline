@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Threading.Channels;
+using Steelax.DataflowPipeline.Common;
 
 namespace Steelax.DataflowPipeline.Extensions;
 
@@ -40,15 +41,15 @@ internal static class AsyncEnumerable
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             var token = tokenSource.Token;
             
-            var enumerators = new ConfiguredCancelableAsyncEnumerable<T>.Enumerator[sources.Length];
+            var enumerators = new IAsyncEnumerator<T>[sources.Length];
             
             for (var i = 0; i < sources.Length; i++)
             {
                 var source = sources[i];
-                enumerators[i] = source.ConfigureAwait(false).WithCancellation(token).GetAsyncEnumerator();
+                enumerators[i] = source.GetAsyncEnumerator(token);
             }
 
-            var awaiters = new ConfiguredValueTaskAwaitable<bool>.ConfiguredValueTaskAwaiter[sources.Length];
+            var moveNextTask = new ValueTask<bool>[sources.Length];
 
             var channel = Channel.CreateBounded<int>(new BoundedChannelOptions(sources.Length)
             {
@@ -64,13 +65,13 @@ internal static class AsyncEnumerable
             for (var i = 0; i < enumerators.Length; i++)
                 MoveNext(i);
 
-            await foreach (var index in channel.Reader.ReadAllAsync(default).ConfigureAwait(false))
+            await foreach (var index in channel.Reader.ReadAllAsync(CancellationToken.None).ConfigureAwait(false))
             {
                 var success = false;
 
                 try
                 {
-                    success = awaiters[index].GetResult();
+                    success = moveNextTask[index].Result;
                 }
                 catch (OperationCanceledException ex) when (ex.CancellationToken == token)
                 {
@@ -110,7 +111,7 @@ internal static class AsyncEnumerable
             }
 
             Array.Clear(enumerators);
-            Array.Clear(awaiters);
+            Array.Clear(moveNextTask);
 
             if (exceptions.Count > 0)
                 throw new AggregateException(exceptions);
@@ -125,13 +126,112 @@ internal static class AsyncEnumerable
             void MoveNext(int index)
             {
                 var enumerator = enumerators[index];
-                var awaiter = enumerator.MoveNextAsync().GetAwaiter();
+                var task = moveNextTask[index] = enumerator.MoveNextAsync();
                 
-                awaiter.OnCompleted(() => OnCompleted(index));
-
-                awaiters[index] = awaiter;
+                task.GetAwaiter().OnCompleted(() => OnCompleted(index));
             }
         }
         
+    }
+
+    public static async IAsyncEnumerable<TimedResult<TValue>> WaitTimeoutAsync<TValue>(
+        this IAsyncEnumerable<TValue> source,
+        TimeSpan interval,
+        bool reset = true,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await using var enumerator = source.GetAsyncEnumerator(cancellationToken);
+
+        var state = new State();
+        
+        await using var timer = new Timer(static state => ((State)state!).Change(OperationState.Timeout), state, interval, interval);
+
+        ValueTask<bool> nextResultTask = default;
+
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            switch ((OperationState)state)
+            {
+                case OperationState.Next:
+                    state.Change(OperationState.Waiting);
+                    
+#pragma warning disable CA2012
+                    nextResultTask = enumerator.MoveNextAsync();
+#pragma warning restore CA2012
+                    nextResultTask.GetAwaiter().OnCompleted(() => state.Change(OperationState.ResultCompleted));
+
+                    if (reset)
+                        timer.Change(interval, interval);
+                    break;
+                case OperationState.Waiting:
+                    await Task.Yield();
+                    break;
+                case OperationState.ResultCompleted:
+                    if (nextResultTask.Result)
+                    {
+                        var result = enumerator.Current;
+                        state.Change(OperationState.Next);
+                        yield return new TimedResult<TValue>(result);
+                    }
+                    else
+                    {
+                        yield break;
+                    }
+                    break;
+                case OperationState.Timeout:
+                    state.Change(OperationState.Waiting);
+                    yield return new TimedResult<TValue>();
+                    break;
+                default:
+#pragma warning disable CA2208
+                    throw new ArgumentOutOfRangeException();
+#pragma warning restore CA2208
+            }
+        }
+    }
+    
+    private sealed class State
+    {
+        private int _state;
+        private SpinLock _lock;
+
+        private OperationState OperationState => (OperationState)_state;
+        
+        public void Change(OperationState newState)
+        {
+            var lockTaken = false;
+            
+            try
+            {
+                _lock.Enter(ref lockTaken);
+
+                var update = newState switch
+                {
+                    OperationState.Waiting when OperationState is OperationState.Next => true,
+                    OperationState.Timeout when OperationState is OperationState.Waiting => true,
+                    OperationState.ResultCompleted when OperationState is OperationState.Waiting or OperationState.Timeout => true,
+                    OperationState.Next when OperationState is OperationState.ResultCompleted => true,
+                    _ => false
+                };
+                
+                if (update)
+                    _state = (int)newState;
+            }
+            finally
+            {
+                if (lockTaken)
+                    _lock.Exit(false);
+            }
+        }
+        
+        public static implicit operator OperationState(State value) => (OperationState)value._state;
+    }
+
+    private enum OperationState
+    {
+        Next = 0,
+        Waiting = 1,
+        ResultCompleted = 2,
+        Timeout = 3
     }
 }

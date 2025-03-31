@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Steelax.DataflowPipeline.Abstractions;
+﻿using Steelax.DataflowPipeline.Abstractions;
 
 namespace Steelax.DataflowPipeline.DefaultBlocks;
 

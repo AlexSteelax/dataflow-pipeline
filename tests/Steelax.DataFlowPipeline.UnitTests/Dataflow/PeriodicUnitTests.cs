@@ -1,9 +1,9 @@
 using System.Numerics;
 using Steelax.DataflowPipeline.DefaultBlocks;
 
-namespace Steelax.DataFlowPipeline.UnitTests;
+namespace Steelax.DataFlowPipeline.UnitTests.Dataflow;
 
-public class BlockUnitTests
+public sealed class PeriodicUnitTests
 {
     private static async IAsyncEnumerable<T> CreateSequence<T>(T size, TimeSpan delay)
         where T : struct, INumber<T>
