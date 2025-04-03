@@ -45,9 +45,9 @@ public readonly struct DataflowTask()
     /// </summary>
     /// <param name="handler"></param>
     /// <returns></returns>
-    public static DataflowTask<TValue> From<TValue>(SourceHandler<TValue> handler)
+    public static DataflowTask<TValue> From<TValue>(Func<CancellationToken, IAsyncEnumerable<TValue>> handler)
     {
-        return DataflowTask<TValue>.From(handler);
+        return DataflowTask<TValue>.From(handler.Invoke);
     }
 }
 
