@@ -1,4 +1,6 @@
 ﻿using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
+using CommunityToolkit.HighPerformance.Buffers;
 
 namespace Steelax.DataflowPipeline.Common;
 
@@ -6,14 +8,12 @@ internal class Packer<TValue>
 {
     private readonly TValue[] _buffer;
     private int _counter;
-    private readonly MemoryPool<TValue> _pool;
 
     public Packer(int capacity)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(capacity, 1);
         
         _buffer = new TValue[capacity];
-        _pool = MemoryPool<TValue>.Shared;
     }
     
     /// <summary>
@@ -27,7 +27,7 @@ internal class Packer<TValue>
     /// <param name="value"></param>
     /// <param name="batch"></param>
     /// <returns></returns>
-    public bool TryAddAndGet(TValue value, out Batch<TValue> batch)
+    public bool TryAddAndGet(TValue value, out IMemoryOwner<TValue> batch)
     {
         if (IsFull)
         {
@@ -46,7 +46,7 @@ internal class Packer<TValue>
             return true;
         }
 
-        batch = new Batch<TValue>();
+        batch = MemoryOwner<TValue>.Empty;
         return false;
     }
 
@@ -55,11 +55,11 @@ internal class Packer<TValue>
     /// </summary>
     /// <param name="batch"></param>
     /// <returns></returns>
-    public bool TryClearAndGet(out Batch<TValue> batch)
+    public bool TryClearAndGet(out IMemoryOwner<TValue> batch)
     {
         if (IsEmpty)
         {
-            batch = new Batch<TValue>();
+            batch = MemoryOwner<TValue>.Empty;
             return false;
         }
 
@@ -76,16 +76,16 @@ internal class Packer<TValue>
         _counter += 1;
     }
 
-    private Batch<TValue> Get()
+    private IMemoryOwner<TValue> Get()
     {
         if (IsEmpty)
-            return new Batch<TValue>();
+            return MemoryOwner<TValue>.Empty;
 
-        var res = _pool.Rent(_counter);
+        var res = MemoryOwner<TValue>.Allocate(_counter);
 
-        _buffer.CopyTo(res.Memory);
+        _buffer.AsSpan(0, _counter).CopyTo(res.Span);
 
-        return new Batch<TValue>(_counter, res);
+        return res;
     }
 
     private void Clear()

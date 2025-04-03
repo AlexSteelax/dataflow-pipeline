@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections;
 using Steelax.DataFlowPipeline.UnitTests.Mocks;
 
@@ -17,6 +18,24 @@ public sealed class BatchUnitTests
                 TimeSpan.FromDays(1),
                 //Timeout.InfiniteTimeSpan,
                 new int[][] { [1, 2], [3, 4], [5] }
+            },
+            new object[]
+            {
+                new[] { 1, 2 },
+                2,
+                TimeSpan.Zero,
+                TimeSpan.FromMilliseconds(50),
+                //Timeout.InfiniteTimeSpan,
+                new int[][] { [1, 2] }
+            },
+            new object[]
+            {
+                new[] { 1, 2, 3 },
+                1,
+                TimeSpan.Zero,
+                TimeSpan.FromDays(1),
+                //Timeout.InfiniteTimeSpan,
+                new int[][] { [1], [2], [3] }
             }
         ];
 
@@ -34,7 +53,7 @@ public sealed class BatchUnitTests
         TimeSpan timeout,
         int[][] expected)
     {
-        var dataflow = new DataflowChannelWriter<Batch<int>>();
+        var dataflow = new DataflowChannelWriter<IMemoryOwner<int>>();
 
         await items
             .ToAsyncEnumerable()
@@ -50,6 +69,6 @@ public sealed class BatchUnitTests
 
         var real = await dataflow.ReadAllAsync();
         
-        Assert.Equal(expected, real.Select(s => s.Span.ToArray()));
+        Assert.Equal(expected, real.Select(s => s.Memory.ToArray()));
     }
 }
