@@ -15,7 +15,7 @@ public static partial class DataflowTaskExtensions
     // ReSharper disable once MemberCanBePrivate.Global
     public static DataflowTask<TOutput> UseAsDataflowSource<TOutput>(this IEnumerable<IDataflowBreader<TOutput>> input)
     {
-        return DataflowTask<TOutput>.CreateNew(token =>
+        return DataflowTask<TOutput>.From(token =>
         {
             var streams = input
                 .Select(s => s.HandleAsync(token))
@@ -45,7 +45,7 @@ public static partial class DataflowTaskExtensions
     {
         var sources = input.ToArray();
         
-        return DataflowTask<TOutput>.CreateNew(token =>
+        return DataflowTask<TOutput>.From(token =>
             AsyncEnumerable.MergeAsync(sources, cancellationToken: token));
     }
 
@@ -67,7 +67,7 @@ public static partial class DataflowTaskExtensions
     // ReSharper disable once MemberCanBePrivate.Global
     public static DataflowTask<TOutput> UseAsDataflowSource<TOutput>(this IEnumerable<ChannelReader<TOutput>> input)
     {
-        return DataflowTask<TOutput>.CreateNew(token =>
+        return DataflowTask<TOutput>.From(token =>
         {
             var streams = input
                 .Select(s => s.ReadAllAsync(token))

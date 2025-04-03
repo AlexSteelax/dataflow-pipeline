@@ -113,7 +113,7 @@ public readonly struct DataflowTask<TValue>
     /// </summary>
     /// <param name="handler"></param>
     /// <returns></returns>
-    internal static DataflowTask<TValue> CreateNew(SourceHandler<TValue> handler)
+    public static DataflowTask<TValue> From(SourceHandler<TValue> handler)
     {
         return new DataflowTask<TValue>(new TaskCollector(), handler);
     }
