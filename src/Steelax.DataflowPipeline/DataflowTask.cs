@@ -38,6 +38,17 @@ public readonly struct DataflowTask()
     {
         return _tasks.WaitAllAsync(cancellationToken);
     }
+    
+    /// <summary>
+    /// Create new dataflow task from input source handler
+    /// <para>[non-thread-safe]</para>
+    /// </summary>
+    /// <param name="handler"></param>
+    /// <returns></returns>
+    public static DataflowTask<TValue> From<TValue>(SourceHandler<TValue> handler)
+    {
+        return DataflowTask<TValue>.From(handler);
+    }
 }
 
 public readonly struct DataflowTask<TValue>
@@ -113,7 +124,7 @@ public readonly struct DataflowTask<TValue>
     /// </summary>
     /// <param name="handler"></param>
     /// <returns></returns>
-    public static DataflowTask<TValue> From(SourceHandler<TValue> handler)
+    internal static DataflowTask<TValue> From(SourceHandler<TValue> handler)
     {
         return new DataflowTask<TValue>(new TaskCollector(), handler);
     }
