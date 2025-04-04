@@ -16,7 +16,6 @@ public sealed class BatchUnitTests
                 2,
                 TimeSpan.Zero,
                 TimeSpan.FromDays(1),
-                //Timeout.InfiniteTimeSpan,
                 new int[][] { [1, 2], [3, 4], [5] }
             },
             new object[]
@@ -25,7 +24,6 @@ public sealed class BatchUnitTests
                 2,
                 TimeSpan.Zero,
                 TimeSpan.FromMilliseconds(50),
-                //Timeout.InfiniteTimeSpan,
                 new int[][] { [1, 2] }
             },
             new object[]
@@ -34,8 +32,15 @@ public sealed class BatchUnitTests
                 1,
                 TimeSpan.Zero,
                 TimeSpan.FromDays(1),
-                //Timeout.InfiniteTimeSpan,
                 new int[][] { [1], [2], [3] }
+            },
+            new object[]
+            {
+                new[] { 1, 2, 3 },
+                1,
+                TimeSpan.FromMilliseconds(100),
+                TimeSpan.FromMilliseconds(90),
+                new int[][] { [], [1], [], [2], [], [3] }
             }
         ];
 
@@ -57,7 +62,7 @@ public sealed class BatchUnitTests
 
         await items
             .ToAsyncEnumerable()
-            .WhereAwait(async s =>
+            .TakeWhileAwait(async s =>
             {
                 await Task.Delay(delay);
                 return true;

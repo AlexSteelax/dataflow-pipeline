@@ -19,14 +19,14 @@ public sealed class PeriodicUnitTests
     [InlineData(100)]
     public async Task Periodic_NoTimeout_Success(int size)
     {
-        var block = new DataflowPeriodic<int>(TimeSpan.FromDays(1), true);
+        var block = new DataflowPeriodic<int>(Timeout.InfiniteTimeSpan, true);
         var expected = Enumerable.Range(0, size).ToList();
         
-        var result = await block.HandleAsync(expected.ToAsyncEnumerable(), CancellationToken.None).ToListAsync();
+        var actual = await block.HandleAsync(expected.ToAsyncEnumerable(), CancellationToken.None).ToListAsync();
         
-        Assert.NotEmpty(result);
-        Assert.DoesNotContain(result, s => s.Expired);
-        Assert.Equivalent(expected, result.Select(s => s.Value));
+        Assert.NotEmpty(actual);
+        Assert.DoesNotContain(actual, s => s.Expired);
+        Assert.Equal(expected, actual.Select(s => s.Value));
     }
     
     [Theory]
