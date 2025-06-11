@@ -13,25 +13,16 @@ All stable packages are available on [NuGet](https://www.nuget.org/packages/Stee
 ## Basic usage
 
 ### Configure your pipeline and run
-```csharp
-var source = Channel.CreateUnbounded<object>();
-
-var pipeline = source.Reader
-                .UseAsDataflowSource()
-                .Batch(10)
-                .Split(
-                    s => s.AsUnbounded().End(),
-                    s => s.AsUnbounded().End());
-
-pipeline.InvokeAsync();
+```
+see tests for examples
 ```
 
 ### You can create your own dataflow block with simple interfaces
 ```
 interface IDataflowAction<TInput>;
-interface IDataflowBackgroundTransform<TInput, TOutput>;
 interface IDataflowBreader<TOutput>;
-interface IDataflowTransform<TInput, TOutput>;
+interface IDataflowPipe<TInput, TOutput>;
+interface IDataflowPipe<T>;
 ```
 
 ### Note
