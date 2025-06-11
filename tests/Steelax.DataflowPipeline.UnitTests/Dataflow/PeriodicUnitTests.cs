@@ -1,7 +1,7 @@
 using System.Numerics;
 using Steelax.DataflowPipeline.DefaultBlocks;
 
-namespace Steelax.DataFlowPipeline.UnitTests.Dataflow;
+namespace Steelax.DataflowPipeline.UnitTests.Dataflow;
 
 public sealed class PeriodicUnitTests
 {

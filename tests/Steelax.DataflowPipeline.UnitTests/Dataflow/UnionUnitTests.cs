@@ -1,11 +1,11 @@
-using Steelax.DataFlowPipeline.UnitTests.Mocks;
+﻿using Steelax.DataflowPipeline.UnitTests.Mocks;
 
-namespace Steelax.DataFlowPipeline.UnitTests.Dataflow;
+namespace Steelax.DataflowPipeline.UnitTests.Dataflow;
 
-public sealed class BufferUnitTests
+public sealed class UnionUnitTests
 {
     [Fact]
-    public async Task Buffer_Success()
+    public async Task Union_Success()
     {
         int[] actual = [1, 2, 3, 4, 5];
 
@@ -13,12 +13,12 @@ public sealed class BufferUnitTests
 
         await actual.ToAsyncEnumerable()
             .UseAsDataflowSource()
-            .Buffer(2)
+            .Union(actual.ToAsyncEnumerable().UseAsDataflowSource())
             .EndWith(dataflow)
             .InvokeAsync(CancellationToken.None);
 
         var real = await dataflow.ReadAllAsync();
         
-        Assert.Equal(actual, real);
+        Assert.Equal(actual.Sum() * 2, real.Sum());
     }
 }

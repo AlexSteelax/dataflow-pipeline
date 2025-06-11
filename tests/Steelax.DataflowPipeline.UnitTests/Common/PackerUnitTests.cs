@@ -1,5 +1,5 @@
 
-namespace Steelax.DataFlowPipeline.UnitTests.Common;
+namespace Steelax.DataflowPipeline.UnitTests.Common;
 
 public class PackerUnitTests
 {

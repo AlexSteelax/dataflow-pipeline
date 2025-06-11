@@ -1,8 +1,8 @@
 using System.Buffers;
 using System.Collections;
-using Steelax.DataFlowPipeline.UnitTests.Mocks;
+using Steelax.DataflowPipeline.UnitTests.Mocks;
 
-namespace Steelax.DataFlowPipeline.UnitTests.Dataflow;
+namespace Steelax.DataflowPipeline.UnitTests.Dataflow;
 
 public sealed class BatchUnitTests
 {

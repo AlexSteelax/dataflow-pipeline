@@ -1,7 +1,7 @@
 using System.Collections;
 using Steelax.DataflowPipeline.Extensions;
 
-namespace Steelax.DataFlowPipeline.UnitTests.Common;
+namespace Steelax.DataflowPipeline.UnitTests.Common;
 
 public sealed class WaitTimeoutUnitTests
 {

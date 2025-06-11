@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Steelax.DataFlowPipeline.UnitTests" />
+    <InternalsVisibleTo Include="Steelax.DataflowPipeline.UnitTests" />
   </ItemGroup>
   
 </Project>

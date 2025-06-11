@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using static Steelax.DataflowPipeline.Extensions.AsyncEnumerable;
 
-namespace Steelax.DataFlowPipeline.UnitTests.Common;
+namespace Steelax.DataflowPipeline.UnitTests.Common;
 
 public sealed class AsyncMergeUnitTests
 {

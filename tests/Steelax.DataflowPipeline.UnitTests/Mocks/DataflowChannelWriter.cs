@@ -1,7 +1,7 @@
 ﻿using System.Threading.Channels;
 using Steelax.DataflowPipeline.Abstractions;
 
-namespace Steelax.DataFlowPipeline.UnitTests.Mocks;
+namespace Steelax.DataflowPipeline.UnitTests.Mocks;
 
 public class DataflowChannelWriter<TInput> :
     IDataflowAction<TInput>
