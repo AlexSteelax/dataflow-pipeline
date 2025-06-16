@@ -17,8 +17,6 @@ public sealed class BufferUnitTests
             .EndWith(block)
             .InvokeAsync(CancellationToken.None);
 
-        var real = await block.ReadAllAsync();
-        
-        Assert.Equal(actual, real);
+        Assert.Equal(actual, block.ReadAll());
     }
 }

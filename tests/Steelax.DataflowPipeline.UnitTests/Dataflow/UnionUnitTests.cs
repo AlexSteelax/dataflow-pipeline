@@ -16,8 +16,6 @@ public sealed class UnionUnitTests
             .EndWith(block)
             .InvokeAsync(CancellationToken.None);
 
-        var real = await block.ReadAllAsync();
-        
-        Assert.Equal(actual.Sum() * 2, real.Sum());
+        Assert.Equal(actual.Sum() * 2, block.ReadAll().Sum());
     }
 }

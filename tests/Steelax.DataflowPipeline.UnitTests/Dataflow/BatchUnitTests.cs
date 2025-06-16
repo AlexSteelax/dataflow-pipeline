@@ -72,8 +72,6 @@ public sealed class BatchUnitTests
             .EndWith(block)
             .InvokeAsync(CancellationToken.None);
 
-        var real = await block.ReadAllAsync();
-        
-        Assert.Equal(expected, real.Select(s => s.Memory.ToArray()));
+        Assert.Equal(expected, block.ReadAll().Select(s => s.Memory.ToArray()));
     }
 }

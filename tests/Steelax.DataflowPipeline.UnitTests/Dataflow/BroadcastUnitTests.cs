@@ -21,9 +21,8 @@ public sealed class BroadcastUnitTests
             .InvokeAsync(CancellationToken.None);
 
         var expected = Enumerable.Range(value, itemCount).Sum() * nextCount;
-        var real = await block.ReadAllAsync();
         
-        Assert.Equal(expected, real.Sum());
+        Assert.Equal(expected, block.ReadAll().Sum());
 
         return;
         

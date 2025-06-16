@@ -20,11 +20,8 @@ public sealed class SplitUnitTests
                 (i => i == 0, s => s.EndWith(dataflow2))])
             .InvokeAsync(CancellationToken.None);
 
-        var real1 = await dataflow1.ReadAllAsync();
-        var real2 = await dataflow2.ReadAllAsync();
-        
-        Assert.Equal([1,3,5], real1);
-        Assert.Equal([2,4], real2);
+        Assert.Equal([1,3,5], dataflow1.ReadAll());
+        Assert.Equal([2,4], dataflow2.ReadAll());
     }
     
     [Fact]
@@ -43,10 +40,7 @@ public sealed class SplitUnitTests
                 s => s.EndWith(dataflow2)])
             .InvokeAsync(CancellationToken.None);
 
-        var real1 = await dataflow1.ReadAllAsync();
-        var real2 = await dataflow2.ReadAllAsync();
-        
-        Assert.Equal([1,3,5], real1);
-        Assert.Equal([2,4], real2);
+        Assert.Equal([1,3,5], dataflow1.ReadAll());
+        Assert.Equal([2,4], dataflow2.ReadAll());
     }
 }
