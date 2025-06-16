@@ -4,26 +4,26 @@ branches:
   main:
     regex: ^master$|^main$
     mode: ContinuousDeployment
-    tag: ''
+    label: ''
     increment: Patch
-    prevent-increment-of-merged-branch-version: true
+    prevent-increment:
+      of-merged-branch: true
     track-merge-target: false
     source-branches: []
     commit-message-incrementing: Enabled
     is-release-branch: false
-    is-mainline: true
     pre-release-weight: 55000
   feature:
     regex: ^features?[/-]
     mode: ContinuousDeployment
-    tag: useBranchName
+    label: useBranchName
     increment: Inherit
-    prevent-increment-of-merged-branch-version: false
+    prevent-increment:
+      of-merged-branch: false
     track-merge-target: false
     source-branches: ['main']
     commit-message-incrementing: Enabled
     is-release-branch: false
-    is-mainline: false
     pre-release-weight: 30000
 ignore:
   sha: []
