@@ -6,7 +6,7 @@ namespace Steelax.DataflowPipeline.Extensions;
 internal static partial class AsyncEnumerable
 {
     public static IAsyncEnumerable<T> MergeAsync<T>(
-        IAsyncEnumerable<T>[] sources,
+        this IAsyncEnumerable<T>[] sources,
         bool thrownExceptionImmediately = false,
         CancellationToken cancellationToken = default)
     {

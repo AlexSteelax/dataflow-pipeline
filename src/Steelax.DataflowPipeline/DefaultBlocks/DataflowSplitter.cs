@@ -1,13 +1,11 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 using Steelax.DataflowPipeline.Abstractions;
-using Steelax.DataflowPipeline.Common.Delegates;
+using Steelax.DataflowPipeline.Common;
 
 namespace Steelax.DataflowPipeline.DefaultBlocks;
 
-internal class DataflowSplitter<TValue, TIndex>(SplitIndexHandle<TValue, TIndex> splitIndexer) :
-    IDataflowAction<TValue>,
-    IDataflowPipe<TValue>
+internal class DataflowSplitter<TValue, TIndex>(SplitIndexHandle<TValue, TIndex> splitIndexer) : IDataflowAction<TValue>
 {
     private readonly List<FilteredWriter> _writers = [];
 
@@ -37,7 +35,7 @@ internal class DataflowSplitter<TValue, TIndex>(SplitIndexHandle<TValue, TIndex>
         return channel;
     }
     
-    async Task IDataflowAction<TValue>.HandleAsync(IAsyncEnumerable<TValue> source, CancellationToken cancellationToken)
+    public async Task HandleAsync(IAsyncEnumerable<TValue> source, CancellationToken cancellationToken)
     {
         await using var enumerator = source.GetAsyncEnumerator(cancellationToken);
 
@@ -85,66 +83,6 @@ internal class DataflowSplitter<TValue, TIndex>(SplitIndexHandle<TValue, TIndex>
             throw exception;
 
         return;
-
-        void Complete()
-        {
-            foreach (var channel in _writers)
-                channel.TryComplete();
-
-            Array.Clear(tasks);
-        }
-    }
-    
-    async IAsyncEnumerable<TValue> IDataflowPipe<TValue, TValue>.HandleAsync(IAsyncEnumerable<TValue> source, [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        await using var enumerator = source.GetAsyncEnumerator(cancellationToken);
-
-        var tasks = new ValueTask[_writers.Count];
-        
-        Exception? exception = null;
-        
-        var index = 0;
-        
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            try
-            {
-                if (!await enumerator.MoveNextAsync().ConfigureAwait(false))
-                    break;
-                
-                for (var i = tasks.Length; i-- > 0;)
-                {
-                    var indexer = splitIndexer.Invoke(enumerator.Current, index);
-                    
-                    #pragma warning disable CA2012
-                    tasks[i] = _writers[i].WriteAsync(indexer, enumerator.Current, cancellationToken);
-                    #pragma warning restore CA2012
-                }
-
-                for (var i = tasks.Length; i-- > 0;)
-                    await tasks[i].ConfigureAwait(false);
-            }
-            catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
-            {
-                break;
-            }
-            catch (Exception ex)
-            {
-                exception = ex;
-                break;
-            }
-            
-            index = Next(index);
-            
-            yield return enumerator.Current;
-        }
-        
-        Complete();
-        
-        if (exception is not null)
-            throw exception;
-
-        yield break;
 
         void Complete()
         {

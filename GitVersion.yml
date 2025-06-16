@@ -1,10 +1,10 @@
 assembly-versioning-scheme: MajorMinorPatchTag
 mode: ContinuousDeployment
-next-version: 1.0.0
+next-version: v1.0.0
 tag-prefix: '[vV]'
 branches:
   main:
-    tag: 'preview'
+    label: 'preview'
 ignore:
   sha: []
 merge-message-formats: {}

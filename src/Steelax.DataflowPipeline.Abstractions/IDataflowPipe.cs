@@ -1,4 +1,7 @@
-﻿namespace Steelax.DataflowPipeline.Abstractions;
+﻿using System.Collections.Generic;
+using System.Threading;
+
+namespace Steelax.DataflowPipeline.Abstractions;
 
 /// <summary>
 /// Represents a dataflow block interface
@@ -20,4 +23,4 @@ public interface IDataflowPipe<in TInput, out TOutput>
 /// Represents a dataflow block interface
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public interface IDataflowPipe<T> : IDataflowPipe<T, T>;
+public interface IDataflowPipe<T> : IDataflowPipe<T, T> { }

@@ -1,4 +1,7 @@
-﻿namespace Steelax.DataflowPipeline.Abstractions;
+﻿using System.Collections.Generic;
+using System.Threading;
+
+namespace Steelax.DataflowPipeline.Abstractions;
 
 /// <summary>
 /// Represents a dataflow block interface

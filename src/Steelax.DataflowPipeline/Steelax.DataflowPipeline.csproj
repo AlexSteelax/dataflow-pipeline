@@ -4,7 +4,21 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Steelax.DataflowPipeline</PackageId>
+    <Title>DataflowPipeline</Title>
+    <Description>Easily build a dataflow pipeline using building blocks</Description>
+    <Authors>Alex Steelax</Authors>
+    <Copyright>Copyright $([System.DateTime]::Now.Year) Alex Steelax</Copyright>
+    <RepositoryUrl>https://github.com/AlexSteelax/dataflow-pipeline</RepositoryUrl>
+    <PackageTags>Pipeline Dataflow Fluent Stream</PackageTags>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,5 +29,32 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Steelax.DataflowPipeline.UnitTests" />
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <ProjectReference Include="..\Steelax.DataflowPipeline.Abstractions\Steelax.DataflowPipeline.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="DataflowTaskExtensions.Batch.cs">
+      <DependentUpon>DataflowTaskExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="DataflowTaskExtensions.Buffer.cs">
+      <DependentUpon>DataflowTaskExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="DataflowTaskExtensions.Periodic.cs">
+      <DependentUpon>DataflowTaskExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="DataflowTaskExtensions.Timeout.cs">
+      <DependentUpon>DataflowTaskExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="DataflowTaskExtensions.Split.cs">
+      <DependentUpon>DataflowTaskExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="DataflowTaskExtensions.Broadcast.cs">
+      <DependentUpon>DataflowTaskExtensions.cs</DependentUpon>
+    </Compile>
+    <Compile Update="DataflowTaskExtensions.Transform.cs">
+      <DependentUpon>DataflowTaskExtensions.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>

@@ -9,15 +9,15 @@ public sealed class BufferUnitTests
     {
         int[] actual = [1, 2, 3, 4, 5];
 
-        var dataflow = new DataflowChannelWriter<int>();
+        var block = new DataflowChannelWriter<int>();
+        var source = actual.ToAsyncEnumerable();
 
-        await actual.ToAsyncEnumerable()
-            .UseAsDataflowSource()
+        await new DataflowTask<int>(_ => source)
             .Buffer(2)
-            .EndWith(dataflow)
+            .EndWith(block)
             .InvokeAsync(CancellationToken.None);
 
-        var real = await dataflow.ReadAllAsync();
+        var real = await block.ReadAllAsync();
         
         Assert.Equal(actual, real);
     }

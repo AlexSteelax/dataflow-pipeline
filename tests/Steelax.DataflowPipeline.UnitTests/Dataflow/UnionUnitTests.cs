@@ -9,15 +9,14 @@ public sealed class UnionUnitTests
     {
         int[] actual = [1, 2, 3, 4, 5];
 
-        var dataflow = new DataflowChannelWriter<int>();
+        var block = new DataflowChannelWriter<int>();
 
-        await actual.ToAsyncEnumerable()
-            .UseAsDataflowSource()
-            .Union(actual.ToAsyncEnumerable().UseAsDataflowSource())
-            .EndWith(dataflow)
+        await new DataflowTask<int>(_ => actual.ToAsyncEnumerable())
+            .Union(new DataflowTask<int>(_ => actual.ToAsyncEnumerable()))
+            .EndWith(block)
             .InvokeAsync(CancellationToken.None);
 
-        var real = await dataflow.ReadAllAsync();
+        var real = await block.ReadAllAsync();
         
         Assert.Equal(actual.Sum() * 2, real.Sum());
     }

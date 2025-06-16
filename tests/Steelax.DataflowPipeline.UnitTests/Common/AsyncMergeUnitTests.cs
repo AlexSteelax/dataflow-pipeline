@@ -1,5 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
-using static Steelax.DataflowPipeline.Extensions.AsyncEnumerable;
+using Steelax.DataflowPipeline.Extensions;
 
 namespace Steelax.DataflowPipeline.UnitTests.Common;
 
@@ -37,7 +37,7 @@ public sealed class AsyncMergeUnitTests
             CreateAsync(3, TimeSpan.FromMilliseconds(10))
         };
 
-        var ret = await MergeAsync(tasks).ToArrayAsync();
+        var ret = await tasks.MergeAsync().ToArrayAsync();
         
         Assert.NotEqual([1,2,3], ret);
     }
@@ -52,7 +52,7 @@ public sealed class AsyncMergeUnitTests
             CreateAsync(3, TimeSpan.FromMilliseconds(10))
         };
 
-        var task = MergeAsync(tasks).ToArrayAsync().AsTask();
+        var task = tasks.MergeAsync().ToArrayAsync().AsTask();
 
         await Assert.ThrowsAsync<AggregateException>(() => task);
 

@@ -1,15 +1,14 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 using Steelax.DataflowPipeline.Abstractions;
+using Steelax.DataflowPipeline.Common;
 
-namespace Steelax.DataflowPipeline.DefaultBlocks.Algorithmic;
+namespace Steelax.DataflowPipeline.AlgorithmBlock;
 
 public abstract class DataflowChangeTracker<TMessage, TKey, TValue>(IEqualityComparer<TValue>? comparer = null) : IDataflowPipe<TMessage>
     where TKey : notnull
 {
     private readonly IEqualityComparer<TValue> _comparer = comparer ?? EqualityComparer<TValue>.Default;
-    
-    private readonly Dictionary<TKey, TrackedValue<TValue>> _tracker = [];
     
     public async IAsyncEnumerable<TMessage> HandleAsync(IAsyncEnumerable<TMessage> source, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -33,9 +32,9 @@ public abstract class DataflowChangeTracker<TMessage, TKey, TValue>(IEqualityCom
             var key = DeconstructKey(message);
 
             // Return current message on first occurrence of the key
-            if (!_tracker.TryGetValue(key, out var previewValue))
+            if (await TryGetTrackedValue(key) is not { } previewValue)
             {
-                _tracker[key] = currentValue;
+                await UpdateTrackedValue(key, currentValue);
                 OnChanged(message, default);
                 yield return message;
                 continue;
@@ -51,17 +50,21 @@ public abstract class DataflowChangeTracker<TMessage, TKey, TValue>(IEqualityCom
             // Skip current message if value hasn't changed
             if (_comparer.Equals(currentValue.Value, previewValue.Value))
             {
-                _tracker[key] = currentValue;
+                await UpdateTrackedValue(key, currentValue);
                 OnUnchanged(message, previewValue);
                 continue;
             }
             
             // Return current message if value has changed
-            _tracker[key] = currentValue;
+            await UpdateTrackedValue(key, currentValue);
             OnChanged(message, previewValue);
             yield return message;
         }
     }
+
+    protected abstract ValueTask<TrackedValue<TValue>?> TryGetTrackedValue(TKey key);
+
+    protected abstract ValueTask UpdateTrackedValue(TKey key, TrackedValue<TValue> value);
 
     /// <summary>
     /// Deconstruct message into tracked-value
@@ -76,12 +79,6 @@ public abstract class DataflowChangeTracker<TMessage, TKey, TValue>(IEqualityCom
     /// <param name="message"></param>
     /// <returns></returns>
     protected abstract TKey DeconstructKey(TMessage message);
-
-    /// <summary>
-    /// Remove tracked-value by key
-    /// </summary>
-    /// <param name="key"></param>
-    protected void RemoveBy(TKey key) => _tracker.Remove(key);
 
     /// <summary>
     /// Fire callback if not same tracked value

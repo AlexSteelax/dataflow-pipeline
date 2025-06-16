@@ -1,4 +1,4 @@
-namespace Steelax.DataflowPipeline.DefaultBlocks.Algorithmic;
+namespace Steelax.DataflowPipeline.Common;
 
 public readonly record struct TrackedValue<TValue>(TValue Value, DateTimeOffset Timestamp)
 {

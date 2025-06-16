@@ -6,14 +6,14 @@ public sealed class BroadcastUnitTests
 {
     [Theory]
     [InlineData(10, 1)]
+    [InlineData(10, 2)]
     public async Task Broadcast_Success(int itemCount, int nextCount)
     {
         const int value = 1;
-        var dataflow = new DataflowChannelWriter<int>();
+        var block = new DataflowChannelWriter<int>();
+        var source = Enumerable.Range(value, itemCount).ToAsyncEnumerable();
 
-        await Enumerable.Range(value, itemCount)
-            .ToAsyncEnumerable()
-            .UseAsDataflowSource()
+        await new DataflowTask<int>(_ => source)
             .Broadcast(Enumerable
                 .Range(0, nextCount)
                 .Select(_ => (Func<DataflowTask<int>, DataflowTask>)Next)
@@ -21,39 +21,12 @@ public sealed class BroadcastUnitTests
             .InvokeAsync(CancellationToken.None);
 
         var expected = Enumerable.Range(value, itemCount).Sum() * nextCount;
-        var real = await dataflow.ReadAllAsync();
+        var real = await block.ReadAllAsync();
         
         Assert.Equal(expected, real.Sum());
 
         return;
         
-        DataflowTask Next(DataflowTask<int> input) => input.EndWith(dataflow);
-    }
-    
-    [Theory]
-    [InlineData(10, 2)]
-    public async Task BroadcastContinue_Success(int itemCount, int nextCount)
-    {
-        const int value = 1;
-        var dataflow = new DataflowChannelWriter<int>();
-
-        await Enumerable.Range(value, itemCount)
-            .ToAsyncEnumerable()
-            .UseAsDataflowSource()
-            .BroadcastContinue(Enumerable
-                .Range(0, nextCount)
-                .Select(_ => (Func<DataflowTask<int>, DataflowTask>)Next)
-                .ToArray())
-            .EndWith(dataflow)
-            .InvokeAsync(CancellationToken.None);
-
-        var expected = Enumerable.Range(value, itemCount).Sum();
-        var real = await dataflow.ReadAllAsync();
-        
-        Assert.Equal(expected, real.Sum());
-
-        return;
-        
-        DataflowTask Next(DataflowTask<int> input) => input.End();
+        DataflowTask Next(DataflowTask<int> input) => input.EndWith(block);
     }
 }

@@ -1,4 +1,4 @@
-using Steelax.DataflowPipeline.Common.Delegates;
+using Steelax.DataflowPipeline.Common;
 using Steelax.DataflowPipeline.DefaultBlocks;
 
 namespace Steelax.DataflowPipeline;
@@ -22,11 +22,15 @@ public static partial class DataflowTaskExtensions
         var split = new DataflowSplitter<TInput, TIndex>(splitIndexer);
         
         var items = filteredDataflows
-            .Select(cfg =>
-                cfg.Dataflow.Invoke(split.AttachConsumer(cfg.Filter).UseAsDataflowSource()))
+            .Select(filteredDataflow =>
+            {
+                var reader = split.AttachConsumer(filteredDataflow.Filter);
+                var source = DataflowTask.From(reader.ReadAllAsync);
+                return filteredDataflow.Dataflow.Invoke(source);
+            })
             .ToArray();
-        
-        return instance.Attach(items).EndWith(split);
+
+        return instance.EndWith(split).Attach(items);
     }
     
     /// <summary>

@@ -12,9 +12,9 @@ public sealed class SplitUnitTests
         var dataflow1 = new DataflowChannelWriter<int>();
         var dataflow2 = new DataflowChannelWriter<int>();
 
-        await actual
-            .ToAsyncEnumerable()
-            .UseAsDataflowSource()
+        var source = actual.ToAsyncEnumerable();
+
+        await new DataflowTask<int>(_ => source)
             .Split((v, i) => v % 2, [
                 (i => i == 1, s => s.EndWith(dataflow1)),
                 (i => i == 0, s => s.EndWith(dataflow2))])
@@ -34,10 +34,10 @@ public sealed class SplitUnitTests
 
         var dataflow1 = new DataflowChannelWriter<int>();
         var dataflow2 = new DataflowChannelWriter<int>();
+        
+        var source = actual.ToAsyncEnumerable();
 
-        await actual
-            .ToAsyncEnumerable()
-            .UseAsDataflowSource()
+        await new DataflowTask<int>(_ => source)
             .Split([
                 s => s.EndWith(dataflow1),
                 s => s.EndWith(dataflow2)])

@@ -58,21 +58,21 @@ public sealed class BatchUnitTests
         TimeSpan timeout,
         int[][] expected)
     {
-        var dataflow = new DataflowChannelWriter<IMemoryOwner<int>>();
-
-        await items
+        var block = new DataflowChannelWriter<IMemoryOwner<int>>();
+        var source = items
             .ToAsyncEnumerable()
             .TakeWhileAwait(async s =>
             {
                 await Task.Delay(delay);
                 return true;
-            })
-            .UseAsDataflowSource()
+            });
+        
+        await new DataflowTask<int>(_ => source)
             .Batch(batchSize, timeout)
-            .EndWith(dataflow)
+            .EndWith(block)
             .InvokeAsync(CancellationToken.None);
 
-        var real = await dataflow.ReadAllAsync();
+        var real = await block.ReadAllAsync();
         
         Assert.Equal(expected, real.Select(s => s.Memory.ToArray()));
     }

@@ -1,4 +1,4 @@
-using Steelax.DataflowPipeline.DefaultBlocks.Algorithmic;
+using Steelax.DataflowPipeline.AlgorithmBlock;
 
 namespace Steelax.DataflowPipeline.UnitTests.DefaultBlocks.Algorithmic;
 
@@ -11,6 +11,22 @@ public class TestMessage
 
 public class TestChangeTracker : DataflowChangeTracker<TestMessage, string, int>
 {
+    private readonly Dictionary<string, TrackedValue<int>> _tracker = [];
+    
+    protected override ValueTask<TrackedValue<int>?> TryGetTrackedValue(string key)
+    {
+        return _tracker.TryGetValue(key, out var value)
+            ? new ValueTask<TrackedValue<int>?>(value)
+            : default;
+    }
+
+    protected override ValueTask UpdateTrackedValue(string key, TrackedValue<int> value)
+    {
+        _tracker[key] = value;
+        
+        return ValueTask.CompletedTask;
+    }
+
     protected override TrackedValue<int> DeconstructValue(TestMessage message) => 
         new(message.Value, message.Timestamp);
 

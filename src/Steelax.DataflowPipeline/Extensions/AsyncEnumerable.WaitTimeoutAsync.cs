@@ -16,7 +16,8 @@ internal static partial class AsyncEnumerable
         var state = new State();
         #pragma warning disable CA2012
         var nextResult = ValueTask.FromResult(true);
-        ValueTaskAwaiter<bool> nextResultAwaiter = default;
+        // ReSharper disable once TooWideLocalVariableScope
+        ValueTaskAwaiter<bool> nextResultAwaiter;
         #pragma warning restore CA2012
         var timerInit = false;
 
@@ -58,7 +59,7 @@ internal static partial class AsyncEnumerable
                     else
                     {
                         //_ = nextResult.Result;
-                        throw new Exception();
+                        throw new InvalidOperationException();
                     }
                     break;
                 case OperationState.Timeout:
