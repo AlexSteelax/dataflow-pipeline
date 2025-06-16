@@ -1,4 +1,3 @@
-using System.Threading.Channels;
 using Steelax.DataflowPipeline.Abstractions;
 using Steelax.DataflowPipeline.DefaultBlocks;
 using Steelax.DataflowPipeline.Extensions;

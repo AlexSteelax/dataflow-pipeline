@@ -31,10 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Steelax.DataflowPipeline.Abstractions\Steelax.DataflowPipeline.Abstractions.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="DataflowTaskExtensions.Batch.cs">
       <DependentUpon>DataflowTaskExtensions.cs</DependentUpon>
     </Compile>
