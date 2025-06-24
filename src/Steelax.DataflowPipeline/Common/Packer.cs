@@ -80,7 +80,7 @@ internal class Packer<TValue>
         if (IsEmpty)
             return MemoryOwner<TValue>.Empty;
 
-        var res = MemoryOwner<TValue>.Allocate(_counter);
+        var res = MemoryOwner<TValue>.Allocate(_counter, AllocationMode.Clear);
 
         _buffer.AsSpan(0, _counter).CopyTo(res.Span);
 
