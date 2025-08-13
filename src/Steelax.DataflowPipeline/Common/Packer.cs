@@ -26,7 +26,7 @@ internal class Packer<TValue>
     /// <param name="value"></param>
     /// <param name="batch"></param>
     /// <returns></returns>
-    public bool TryAddAndGet(TValue value, out IMemoryOwner<TValue> batch)
+    public bool TryAddAndGet(TValue value, out Batch<TValue> batch)
     {
         if (IsFull)
         {
@@ -45,7 +45,7 @@ internal class Packer<TValue>
             return true;
         }
 
-        batch = MemoryOwner<TValue>.Empty;
+        batch = Batch<TValue>.Empty;
         return false;
     }
 
@@ -54,11 +54,11 @@ internal class Packer<TValue>
     /// </summary>
     /// <param name="batch"></param>
     /// <returns></returns>
-    public bool TryClearAndGet(out IMemoryOwner<TValue> batch)
+    public bool TryClearAndGet(out Batch<TValue> batch)
     {
         if (IsEmpty)
         {
-            batch = MemoryOwner<TValue>.Empty;
+            batch = Batch<TValue>.Empty;
             return false;
         }
 
@@ -75,16 +75,11 @@ internal class Packer<TValue>
         _counter += 1;
     }
 
-    private IMemoryOwner<TValue> Get()
+    private Batch<TValue> Get()
     {
-        if (IsEmpty)
-            return MemoryOwner<TValue>.Empty;
-
-        var res = MemoryOwner<TValue>.Allocate(_counter, AllocationMode.Clear);
-
-        _buffer.AsSpan(0, _counter).CopyTo(res.Span);
-
-        return res;
+        return IsEmpty
+            ? Batch<TValue>.Empty
+            : Batch<TValue>.From(_buffer, _counter);
     }
 
     private void Clear()

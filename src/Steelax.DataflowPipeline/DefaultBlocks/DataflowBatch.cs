@@ -7,7 +7,7 @@ using Steelax.DataflowPipeline.Extensions;
 namespace Steelax.DataflowPipeline.DefaultBlocks;
 
 internal sealed class DataflowBatch<T> :
-    IDataflowPipe<T, IMemoryOwner<T>>
+    IDataflowPipe<T, Batch<T>>
 {
     private readonly int _size;
     private readonly TimeSpan _interval;
@@ -18,19 +18,19 @@ internal sealed class DataflowBatch<T> :
         _interval = interval;
     }
 
-    public static IDataflowPipe<T, IMemoryOwner<T>> Create(int size, TimeSpan interval)
+    public static IDataflowPipe<T, Batch<T>> Create(int size, TimeSpan interval)
     {
         ArgumentOutOfRangeException.ThrowIfZero(interval.Ticks, nameof(interval));
 
         return new DataflowBatch<T>(size, interval);
     }
     
-    public static IDataflowPipe<T, IMemoryOwner<T>> Create(int size)
+    public static IDataflowPipe<T, Batch<T>> Create(int size)
     {
         return new DataflowBatch<T>(size, Timeout.InfiniteTimeSpan);
     }
     
-    public IAsyncEnumerable<IMemoryOwner<T>> HandleAsync(IAsyncEnumerable<T> source, CancellationToken cancellationToken) => _interval == Timeout.InfiniteTimeSpan
+    public IAsyncEnumerable<Batch<T>> HandleAsync(IAsyncEnumerable<T> source, CancellationToken cancellationToken) => _interval == Timeout.InfiniteTimeSpan
         ? HandleAsync<T, T>(
             source,
             _size,
@@ -44,7 +44,7 @@ internal sealed class DataflowBatch<T> :
             s => s.Expired,
             cancellationToken);
 
-    private static async IAsyncEnumerable<IMemoryOwner<TOutput>> HandleAsync<TInput, TOutput>(
+    private static async IAsyncEnumerable<Batch<TOutput>> HandleAsync<TInput, TOutput>(
         IAsyncEnumerable<TInput> source,
         int size,
         Func<TInput, TOutput> mapper,
@@ -53,7 +53,7 @@ internal sealed class DataflowBatch<T> :
     {
         var packer = new Packer<TOutput>(size);
         
-        IMemoryOwner<TOutput> buffer;
+        Batch<TOutput> buffer;
         
         await using var enumerator = source.GetAsyncEnumerator(cancellationToken);
 
