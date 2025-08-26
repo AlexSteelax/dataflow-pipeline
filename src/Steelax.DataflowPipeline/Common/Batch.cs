@@ -18,7 +18,7 @@ public sealed class Batch<T> : IDisposable, IReadOnlyList<T>
     // ReSharper disable once MemberCanBePrivate.Global
     public static readonly Batch<T> Empty = new(null);
 
-    internal static Batch<T> From(T[] buffer, int length)
+    public static Batch<T> From(T[] buffer, int length)
     {
         ArgumentNullException.ThrowIfNull(buffer, nameof(buffer));
         
