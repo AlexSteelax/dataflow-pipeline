@@ -2,7 +2,7 @@ namespace Steelax.DataflowPipeline.Extensions;
 
 internal static partial class AsyncEnumerable
 {
-    private static IAsyncEnumerable<T> Empty<T>() => EmptyAsyncEnumerator<T>.Instance;
+    public static IAsyncEnumerable<T> Empty<T>() => EmptyAsyncEnumerator<T>.Instance;
 
     private class EmptyAsyncEnumerator<T> : IAsyncEnumerator<T>, IAsyncEnumerable<T>
     {

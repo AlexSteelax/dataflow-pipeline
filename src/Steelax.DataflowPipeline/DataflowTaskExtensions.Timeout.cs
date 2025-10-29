@@ -12,7 +12,7 @@ public static partial class DataflowTaskExtensions
     /// <param name="timeout"></param>
     /// <typeparam name="TInput"></typeparam>
     /// <returns></returns>
-    public static DataflowTask<TimedResult<TInput>> Timeout<TInput>(this DataflowTask<TInput> instance, TimeSpan timeout)
+    public static DataflowTask<TimedAvailability<TInput>> Timeout<TInput>(this DataflowTask<TInput> instance, TimeSpan timeout)
     {
         ArgumentOutOfRangeException.ThrowIfZero(timeout.Ticks, nameof(timeout));
 

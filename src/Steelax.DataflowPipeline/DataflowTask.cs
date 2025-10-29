@@ -1,4 +1,5 @@
 ﻿using Steelax.DataflowPipeline.Abstractions;
+using Steelax.DataflowPipeline.Common;
 using Steelax.DataflowPipeline.Extensions;
 
 namespace Steelax.DataflowPipeline;
@@ -9,13 +10,19 @@ public class DataflowTask(Func<CancellationToken, Task> handler)
     
     public IReadOnlyList<Func<CancellationToken, Task>> Handlers => _handlers;
 
-    public static DataflowTask<T> From<T>(params DataflowBreaderDelegate<T>[] handlers)
+    public static DataflowTask<T> From<T>(DataflowBreaderDelegate<T>[] handlers, IAsyncEnumerableMerger<T>? merger = null)
     {
         ArgumentOutOfRangeException.ThrowIfZero(handlers.Length, nameof(handlers));
+
+        merger ??= AsyncEnumerableMerger<T>.Default;
         
-        return handlers.Length == 1
-            ? new DataflowTask<T>(handlers[0].Invoke)
-            : new DataflowTask<T>(token => handlers.Select(s => s.Invoke(token)).ToArray().MergeAsync(cancellationToken: token));
+        return new DataflowTask<T>(MergeAsync);
+        
+        IAsyncEnumerable<T> MergeAsync(CancellationToken token)
+        {
+            var streams = handlers.Select(s => s.Invoke(token)).ToArray();
+            return merger.MergeAsync(streams, token);
+        }
     }
 
     public static DataflowTask<T> From<T>(params IDataflowBreader<T>[] dataflows)

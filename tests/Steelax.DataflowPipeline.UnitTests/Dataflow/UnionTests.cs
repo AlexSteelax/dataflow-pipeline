@@ -2,7 +2,7 @@
 
 namespace Steelax.DataflowPipeline.UnitTests.Dataflow;
 
-public sealed class UnionUnitTests
+public sealed class UnionTests
 {
     [Fact]
     public async Task Union_Success()
@@ -12,10 +12,10 @@ public sealed class UnionUnitTests
         var block = new DataflowChannelWriter<int>();
 
         await new DataflowTask<int>(_ => actual.ToAsyncEnumerable())
-            .Union(new DataflowTask<int>(_ => actual.ToAsyncEnumerable()))
+            .Union([new DataflowTask<int>(_ => actual.ToAsyncEnumerable())])
             .EndWith(block)
             .InvokeAsync(CancellationToken.None);
 
-        Assert.Equal(actual.Sum() * 2, block.ReadAll().Sum());
+        Assert.Equal(actual.Sum() * 2, block.ReadAll(TestContext.Current.CancellationToken).Sum());
     }
 }

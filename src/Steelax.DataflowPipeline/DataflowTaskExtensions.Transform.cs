@@ -32,14 +32,14 @@ public static partial class DataflowTaskExtensions
     /// <typeparam name="TOutput"></typeparam>
     /// <returns></returns>
     public static DataflowTask<TOutput> NoTimedTransform<TInput, TOutput>(
-        this DataflowTask<TimedResult<TInput>> instance,
+        this DataflowTask<TimedAvailability<TInput>> instance,
         Func<TInput, TOutput> mapper,
         Func<TInput, bool>? filter = null)
     {
-        return instance.Then(new DataflowPipe<TimedResult<TInput>, TOutput>(MapTo, Filter));
+        return instance.Then(new DataflowPipe<TimedAvailability<TInput>, TOutput>(MapTo, Filter));
 
-        TOutput MapTo(TimedResult<TInput> input) => mapper.Invoke(input.Value);
-        bool Filter(TimedResult<TInput> input) => !input.Expired && (filter?.Invoke(input.Value) ?? true);
+        TOutput MapTo(TimedAvailability<TInput> input) => mapper.Invoke(input.Value);
+        bool Filter(TimedAvailability<TInput> input) => !input.IsAvailable && (filter?.Invoke(input.Value) ?? true);
     }
     
     /// <summary>
@@ -51,18 +51,18 @@ public static partial class DataflowTaskExtensions
     /// <typeparam name="TInput"></typeparam>
     /// <typeparam name="TOutput"></typeparam>
     /// <returns></returns>
-    public static DataflowTask<TimedResult<TOutput>> TimedTransform<TInput, TOutput>(
-        this DataflowTask<TimedResult<TInput>> instance,
+    public static DataflowTask<TimedAvailability<TOutput>> TimedTransform<TInput, TOutput>(
+        this DataflowTask<TimedAvailability<TInput>> instance,
         Func<TInput, TOutput> mapper,
         Func<TInput, DateTimeOffset, bool>? filter = null)
     {
-        return instance.Then(new DataflowPipe<TimedResult<TInput>, TimedResult<TOutput>>(MapTo, Filter));
+        return instance.Then(new DataflowPipe<TimedAvailability<TInput>, TimedAvailability<TOutput>>(MapTo, Filter));
 
-        TimedResult<TOutput> MapTo(TimedResult<TInput> input) => input.Expired
-            ? new TimedResult<TOutput>(input.Timestamp)
-            : new TimedResult<TOutput>(mapper.Invoke(input.Value), input.Timestamp);
+        TimedAvailability<TOutput> MapTo(TimedAvailability<TInput> input) => input.IsAvailable
+            ? TimedAvailability<TOutput>.Timeout(input.Timestamp)
+            : TimedAvailability<TOutput>.Available(mapper.Invoke(input.Value), input.Timestamp);
 
-        bool Filter(TimedResult<TInput> input) =>
+        bool Filter(TimedAvailability<TInput> input) =>
             filter?.Invoke(input.Value, input.Timestamp) ?? true;
     }
 }

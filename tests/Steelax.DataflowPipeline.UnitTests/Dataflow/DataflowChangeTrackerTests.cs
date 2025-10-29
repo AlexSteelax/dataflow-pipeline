@@ -1,6 +1,6 @@
 using Steelax.DataflowPipeline.AlgorithmBlock;
 
-namespace Steelax.DataflowPipeline.UnitTests.DefaultBlocks.Algorithmic;
+namespace Steelax.DataflowPipeline.UnitTests.Dataflow;
 
 public class TestMessage
 {
@@ -51,7 +51,7 @@ public class DataflowChangeTrackerTests
         var source = new[] { message }.ToAsyncEnumerable();
 
         // Act
-        var result = await _tracker.HandleAsync(source, CancellationToken.None).ToListAsync();
+        var result = await _tracker.HandleAsync(source, CancellationToken.None).ToListAsync(TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Single(result);
@@ -70,7 +70,7 @@ public class DataflowChangeTrackerTests
         }.ToAsyncEnumerable();
 
         // Act
-        var result = await _tracker.HandleAsync(messages, CancellationToken.None).ToListAsync();
+        var result = await _tracker.HandleAsync(messages, CancellationToken.None).ToListAsync(TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(2, result.Count);
@@ -90,7 +90,7 @@ public class DataflowChangeTrackerTests
         }.ToAsyncEnumerable();
 
         // Act
-        var result = await _tracker.HandleAsync(messages, CancellationToken.None).ToListAsync();
+        var result = await _tracker.HandleAsync(messages, CancellationToken.None).ToListAsync(TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Single(result);
@@ -109,7 +109,7 @@ public class DataflowChangeTrackerTests
         }.ToAsyncEnumerable();
 
         // Act
-        var result = await _tracker.HandleAsync(messages, CancellationToken.None).ToListAsync();
+        var result = await _tracker.HandleAsync(messages, CancellationToken.None).ToListAsync(TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Single(result);
@@ -130,7 +130,7 @@ public class DataflowChangeTrackerTests
         }.ToAsyncEnumerable();
 
         // Act
-        var result = await _tracker.HandleAsync(messages, CancellationToken.None).ToListAsync();
+        var result = await _tracker.HandleAsync(messages, CancellationToken.None).ToListAsync(TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(4, result.Count);

@@ -5,9 +5,9 @@ using Steelax.DataflowPipeline.Extensions;
 namespace Steelax.DataflowPipeline.DefaultBlocks;
 
 internal class DataflowPeriodic<TValue>(TimeSpan period, bool reset)
-    : IDataflowPipe<TValue, TimedResult<TValue>>
+    : IDataflowPipe<TValue, TimedAvailability<TValue>>
 {
-    public IAsyncEnumerable<TimedResult<TValue>> HandleAsync(IAsyncEnumerable<TValue> source, CancellationToken cancellationToken)
+    public IAsyncEnumerable<TimedAvailability<TValue>> HandleAsync(IAsyncEnumerable<TValue> source, CancellationToken cancellationToken)
     {
         return source.WaitTimeoutAsync(period, reset, cancellationToken);
     }

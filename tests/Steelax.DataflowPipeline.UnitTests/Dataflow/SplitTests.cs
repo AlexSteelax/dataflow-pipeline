@@ -2,7 +2,7 @@ using Steelax.DataflowPipeline.UnitTests.Mocks;
 
 namespace Steelax.DataflowPipeline.UnitTests.Dataflow;
 
-public sealed class SplitUnitTests
+public sealed class SplitTests
 {
     [Fact]
     public async Task Split_Success()
@@ -20,8 +20,8 @@ public sealed class SplitUnitTests
                 (i => i == 0, s => s.EndWith(dataflow2))])
             .InvokeAsync(CancellationToken.None);
 
-        Assert.Equal([1,3,5], dataflow1.ReadAll());
-        Assert.Equal([2,4], dataflow2.ReadAll());
+        Assert.Equal([1,3,5], dataflow1.ReadAll(TestContext.Current.CancellationToken));
+        Assert.Equal([2,4], dataflow2.ReadAll(TestContext.Current.CancellationToken));
     }
     
     [Fact]
@@ -40,7 +40,7 @@ public sealed class SplitUnitTests
                 s => s.EndWith(dataflow2)])
             .InvokeAsync(CancellationToken.None);
 
-        Assert.Equal([1,3,5], dataflow1.ReadAll());
-        Assert.Equal([2,4], dataflow2.ReadAll());
+        Assert.Equal([1,3,5], dataflow1.ReadAll(TestContext.Current.CancellationToken));
+        Assert.Equal([2,4], dataflow2.ReadAll(TestContext.Current.CancellationToken));
     }
 }

@@ -5,7 +5,7 @@ namespace Steelax.DataflowPipeline.Extensions;
 
 internal static partial class AsyncEnumerable
 {
-    public static async IAsyncEnumerable<TimedResult<TValue>> WaitTimeoutAsync<TValue>(
+    public static async IAsyncEnumerable<TimedAvailability<TValue>> WaitTimeoutAsync<TValue>(
         this IAsyncEnumerable<TValue> source,
         TimeSpan timeout,
         bool reset = true,
@@ -51,7 +51,7 @@ internal static partial class AsyncEnumerable
                         {
                             var result = enumerator.Current;
                             state.Change(OperationState.Next);
-                            yield return new TimedResult<TValue>(result);
+                            yield return TimedAvailability<TValue>.Available(result, DateTimeOffset.UtcNow);
                         }
                         else
                             yield break;
@@ -66,7 +66,7 @@ internal static partial class AsyncEnumerable
                     if (reset)
                         timer.Change(timeout, Timeout.InfiniteTimeSpan);
                     state.Change(OperationState.Waiting);
-                    yield return new TimedResult<TValue>();
+                    yield return TimedAvailability<TValue>.Timeout(DateTimeOffset.UtcNow);
                     break;
                 case OperationState.Waiting:
                     await Task.Yield();

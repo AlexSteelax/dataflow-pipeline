@@ -3,28 +3,26 @@ using Steelax.DataflowPipeline.Extensions;
 
 namespace Steelax.DataflowPipeline.UnitTests.Common;
 
-public sealed class WaitTimeoutUnitTests
+public sealed class WaitTimeoutTests
 {
     public sealed class TestItems : IEnumerable<object[]>
     {
         private readonly List<object[]> _items =
         [
-            new object[]
-            {
+            [
                 new[] { 1, 2, 3 },
                 TimeSpan.FromMilliseconds(100),
                 TimeSpan.FromMilliseconds(90),
                 true,
                 new[] { -1, 1, -1, 2, -1, 3 }
-            },
-            new object[]
-            {
+            ],
+            [
                 new[] { 1, 2 },
                 TimeSpan.FromMilliseconds(100),
                 TimeSpan.FromMilliseconds(130),
                 false,
                 new[] { 1, -1, 2 }
-            }
+            ]
         ];
 
         public IEnumerator<object[]> GetEnumerator() => _items.GetEnumerator();
@@ -49,8 +47,8 @@ public sealed class WaitTimeoutUnitTests
                 return true;
             });
 
-        var ret = await source.WaitTimeoutAsync(timeout, reset, CancellationToken.None).ToListAsync();
+        var ret = await source.WaitTimeoutAsync(timeout, reset, CancellationToken.None).ToListAsync(TestContext.Current.CancellationToken);
         
-        Assert.Equal(expected, ret.Select(s => s.Expired ? -1 : s.Value));
+        Assert.Equal(expected, ret.Select(s => s.IsAvailable ? s.Value : -1));
     }
 }

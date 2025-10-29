@@ -2,7 +2,7 @@ using Steelax.DataflowPipeline.UnitTests.Mocks;
 
 namespace Steelax.DataflowPipeline.UnitTests.Dataflow;
 
-public sealed class BroadcastUnitTests
+public sealed class BroadcastTests
 {
     [Theory]
     [InlineData(10, 1)]
@@ -22,7 +22,7 @@ public sealed class BroadcastUnitTests
 
         var expected = Enumerable.Range(value, itemCount).Sum() * nextCount;
         
-        Assert.Equal(expected, block.ReadAll().Sum());
+        Assert.Equal(expected, block.ReadAll(TestContext.Current.CancellationToken).Sum());
 
         return;
         

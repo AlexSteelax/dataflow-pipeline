@@ -12,7 +12,7 @@ public static partial class DataflowTaskExtensions
     /// <param name="interval"></param>
     /// <typeparam name="TInput"></typeparam>
     /// <returns></returns>
-    public static DataflowTask<TimedResult<TInput>> Periodic<TInput>(this DataflowTask<TInput> instance, TimeSpan interval)
+    public static DataflowTask<TimedAvailability<TInput>> Periodic<TInput>(this DataflowTask<TInput> instance, TimeSpan interval)
     {
         ArgumentOutOfRangeException.ThrowIfZero(interval.Ticks, nameof(interval));
 

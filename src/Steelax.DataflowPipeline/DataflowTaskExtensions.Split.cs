@@ -25,7 +25,7 @@ public static partial class DataflowTaskExtensions
             .Select(filteredDataflow =>
             {
                 var reader = split.AttachConsumer(filteredDataflow.Filter);
-                var source = DataflowTask.From(reader.ReadAllAsync);
+                var source = DataflowTask.From([reader.ReadAllAsync]);
                 return filteredDataflow.Dataflow.Invoke(source);
             })
             .ToArray();

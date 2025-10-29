@@ -2,7 +2,7 @@ using Steelax.DataflowPipeline.UnitTests.Mocks;
 
 namespace Steelax.DataflowPipeline.UnitTests.Dataflow;
 
-public sealed class BufferUnitTests
+public sealed class BufferTests
 {
     [Fact]
     public async Task Buffer_Success()
@@ -17,6 +17,6 @@ public sealed class BufferUnitTests
             .EndWith(block)
             .InvokeAsync(CancellationToken.None);
 
-        Assert.Equal(actual, block.ReadAll());
+        Assert.Equal(actual, block.ReadAll(TestContext.Current.CancellationToken));
     }
 }

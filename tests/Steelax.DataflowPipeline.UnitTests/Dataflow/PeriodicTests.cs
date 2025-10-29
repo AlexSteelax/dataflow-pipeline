@@ -3,7 +3,7 @@ using Steelax.DataflowPipeline.DefaultBlocks;
 
 namespace Steelax.DataflowPipeline.UnitTests.Dataflow;
 
-public sealed class PeriodicUnitTests
+public sealed class PeriodicTests
 {
     private static async IAsyncEnumerable<T> CreateSequence<T>(T size, TimeSpan delay)
         where T : struct, INumber<T>
@@ -22,10 +22,10 @@ public sealed class PeriodicUnitTests
         var block = new DataflowPeriodic<int>(Timeout.InfiniteTimeSpan, true);
         var expected = Enumerable.Range(0, size).ToList();
         
-        var actual = await block.HandleAsync(expected.ToAsyncEnumerable(), CancellationToken.None).ToListAsync();
+        var actual = await block.HandleAsync(expected.ToAsyncEnumerable(), CancellationToken.None).ToListAsync(TestContext.Current.CancellationToken);
         
         Assert.NotEmpty(actual);
-        Assert.DoesNotContain(actual, s => s.Expired);
+        Assert.DoesNotContain(actual, s => !s.IsAvailable);
         Assert.Equal(expected, actual.Select(s => s.Value));
     }
     
@@ -37,11 +37,11 @@ public sealed class PeriodicUnitTests
         var values = CreateSequence(size, TimeSpan.FromMilliseconds(10));
         var expected = Enumerable.Range(0, size).ToList();
     
-        var result = await block.HandleAsync(values, CancellationToken.None).ToListAsync();
+        var result = await block.HandleAsync(values, CancellationToken.None).ToListAsync(TestContext.Current.CancellationToken);
         
         Assert.NotEmpty(result);
-        Assert.Contains(result, s => s.Expired);
-        Assert.Contains(result, s => !s.Expired);
-        Assert.Equivalent(expected, result.Where(s => !s.Expired).Select(s => s.Value));
+        Assert.Contains(result, s => s.IsAvailable);
+        Assert.Contains(result, s => !s.IsAvailable);
+        Assert.Equivalent(expected, result.Where(s => s.IsAvailable).Select(s => s.Value));
     }
 }

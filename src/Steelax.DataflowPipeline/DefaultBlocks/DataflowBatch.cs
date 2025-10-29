@@ -37,11 +37,11 @@ internal sealed class DataflowBatch<T> :
             s => s,
             s => false,
             cancellationToken)
-        : HandleAsync<TimedResult<T>, T>(
+        : HandleAsync<TimedAvailability<T>, T>(
             source.WaitTimeoutAsync(_interval, true, cancellationToken),
             _size,
             s => s.Value,
-            s => s.Expired,
+            s => !s.IsAvailable,
             cancellationToken);
 
     private static async IAsyncEnumerable<Batch<TOutput>> HandleAsync<TInput, TOutput>(
@@ -53,7 +53,7 @@ internal sealed class DataflowBatch<T> :
     {
         var packer = new Packer<TOutput>(size);
         
-        Batch<TOutput> buffer;
+        Batch<TOutput>? buffer;
         
         await using var enumerator = source.GetAsyncEnumerator(cancellationToken);
 
@@ -80,16 +80,16 @@ internal sealed class DataflowBatch<T> :
 
             if (completer.Invoke(result))
             {
-                _ = packer.TryClearAndGet(out buffer);
-                yield return buffer;
+                _ = packer.TryClear(out buffer);
+                yield return buffer ?? Batch<TOutput>.Empty;
             }
-            else if (packer.TryAddAndGet(mapper.Invoke(result), out buffer))
+            else if (packer.TryEnqueue(mapper.Invoke(result), out buffer))
             {
                 yield return buffer;
             }
         }
         
-        if (packer.TryClearAndGet(out buffer))
+        if (packer.TryClear(out buffer))
             yield return buffer;
         
         if (exception is not null)

@@ -19,7 +19,7 @@ public static partial class DataflowTaskExtensions
             .Select(dataflow =>
             {
                 var reader = broadcast.AttachConsumer();
-                var source = DataflowTask.From(reader.ReadAllAsync);
+                var source = DataflowTask.From([reader.ReadAllAsync]);
 
                 return dataflow.Invoke(source);
             })

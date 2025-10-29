@@ -4,44 +4,40 @@ using Steelax.DataflowPipeline.UnitTests.Mocks;
 
 namespace Steelax.DataflowPipeline.UnitTests.Dataflow;
 
-public sealed class BatchUnitTests
+public sealed class BatchTests
 {
     public sealed class TestItems : IEnumerable<object[]>
     {
         private readonly List<object[]> _items =
         [
-            new object[]
-            {
+            [
                 new[] { 1, 2, 3, 4, 5 },
                 2,
                 TimeSpan.Zero,
                 TimeSpan.FromDays(1),
                 new int[][] { [1, 2], [3, 4], [5] }
-            },
-            new object[]
-            {
+            ],
+            [
                 new[] { 1, 2 },
                 2,
                 TimeSpan.Zero,
                 TimeSpan.FromMilliseconds(50),
                 new int[][] { [1, 2] }
-            },
-            new object[]
-            {
+            ],
+            [
                 new[] { 1, 2, 3 },
                 1,
                 TimeSpan.Zero,
                 TimeSpan.FromDays(1),
                 new int[][] { [1], [2], [3] }
-            },
-            new object[]
-            {
+            ],
+            [
                 new[] { 1, 2, 3 },
                 1,
                 TimeSpan.FromMilliseconds(100),
                 TimeSpan.FromMilliseconds(90),
                 new int[][] { [], [1], [], [2], [], [3] }
-            }
+            ]
         ];
 
         public IEnumerator<object[]> GetEnumerator() => _items.GetEnumerator();
@@ -72,6 +68,6 @@ public sealed class BatchUnitTests
             .EndWith(block)
             .InvokeAsync(CancellationToken.None);
 
-        Assert.Equal(expected, block.ReadAll().Select(s => s.ToArray()));
+        Assert.Equal(expected, block.ReadAll(TestContext.Current.CancellationToken).Select(s => s.ToArray()));
     }
 }
