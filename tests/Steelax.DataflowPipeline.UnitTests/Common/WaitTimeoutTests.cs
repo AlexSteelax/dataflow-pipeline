@@ -12,7 +12,7 @@ public sealed class WaitTimeoutTests
             [
                 new[] { 1, 2, 3 },
                 TimeSpan.FromMilliseconds(100),
-                TimeSpan.FromMilliseconds(90),
+                TimeSpan.FromMilliseconds(70),
                 true,
                 new[] { -1, 1, -1, 2, -1, 3 }
             ],
