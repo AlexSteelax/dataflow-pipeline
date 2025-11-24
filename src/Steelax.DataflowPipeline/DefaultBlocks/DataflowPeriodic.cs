@@ -1,6 +1,5 @@
 using Steelax.DataflowPipeline.Abstractions;
 using Steelax.DataflowPipeline.Common;
-using Steelax.DataflowPipeline.Extensions;
 
 namespace Steelax.DataflowPipeline.DefaultBlocks;
 

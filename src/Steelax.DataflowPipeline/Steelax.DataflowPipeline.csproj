@@ -55,5 +55,11 @@
     <Compile Update="DataflowTaskExtensions.Transform.cs">
       <DependentUpon>DataflowTaskExtensions.cs</DependentUpon>
     </Compile>
+    <Compile Update="Async\AsyncMergeBuilder.cs">
+      <DependentUpon>AsyncMergeable.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Async\FaultToleranceMode.cs">
+      <DependentUpon>AsyncMergeable.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

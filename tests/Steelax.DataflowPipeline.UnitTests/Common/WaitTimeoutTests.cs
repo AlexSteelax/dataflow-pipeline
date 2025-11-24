@@ -1,5 +1,4 @@
 using System.Collections;
-using Steelax.DataflowPipeline.Extensions;
 
 namespace Steelax.DataflowPipeline.UnitTests.Common;
 

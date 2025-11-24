@@ -277,4 +277,16 @@ public class BatchTests
 
         Assert.False(nonGenericEnumerator.MoveNext());
     }
+
+    [Fact]
+    public void Empty_Dispose()
+    {
+        // Arrange
+        var batch = Batch<object>.From(null);
+
+        using (batch)
+        {
+            Assert.True(batch.IsEmpty);
+        }
+    }
 }

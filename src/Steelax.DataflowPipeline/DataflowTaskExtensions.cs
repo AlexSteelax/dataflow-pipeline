@@ -1,8 +1,6 @@
 using Steelax.DataflowPipeline.Abstractions;
 using Steelax.DataflowPipeline.Async;
-using Steelax.DataflowPipeline.Common;
 using Steelax.DataflowPipeline.DefaultBlocks;
-using Steelax.DataflowPipeline.Extensions;
 
 namespace Steelax.DataflowPipeline;
 
@@ -28,19 +26,17 @@ public static partial class DataflowTaskExtensions
     /// </summary>
     /// <param name="instance"></param>
     /// <param name="sources"></param>
-    /// <param name="merger"></param>
+    /// <param name="faultToleranceMode"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static DataflowTask<T> Union<T>(this DataflowTask<T> instance, DataflowTask<T>[] sources, IAsyncEnumerableMerger<T>? merger = null)
+    public static DataflowTask<T> Union<T>(this DataflowTask<T> instance, DataflowTask<T>[] sources, FaultToleranceMode faultToleranceMode = FaultToleranceMode.Strict)
     {
-        merger ??= AsyncEnumerableMerger<T>.Default;
-
         return new DataflowTask<T>(MergeAsync);
 
         IAsyncEnumerable<T> MergeAsync(CancellationToken token)
         {
             var streams = sources.Append(instance).Select(s => s.Handler.Invoke(token)).ToArray();
-            return merger.MergeAsync(streams, token);
+            return streams.MergeAsync(faultToleranceMode, token);
         }
     }
     
