@@ -48,7 +48,7 @@ internal sealed class DataflowBuffer<TValue>(int capacity, BufferMode mode) :
                 await writer.WriteAsync(result, cancellationToken).ConfigureAwait(false);
             }
         }
-        catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
+        catch (OperationCanceledException)
         {
             writer.Complete();
         }

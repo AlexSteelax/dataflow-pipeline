@@ -64,7 +64,7 @@ internal sealed class DataflowBatch<T> :
                 if (!await enumerator.MoveNextAsync().ConfigureAwait(false))
                     break;
             }
-            catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
+            catch (OperationCanceledException)
             {
                 break;
             }

@@ -46,7 +46,7 @@ internal sealed class DataflowBroadcast<TValue> : IDataflowAction<TValue>
                 for (var i = tasks.Length; i-- > 0;)
                     await tasks[i].ConfigureAwait(false);
             }
-            catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
+            catch (OperationCanceledException)
             {
                 break;
             }

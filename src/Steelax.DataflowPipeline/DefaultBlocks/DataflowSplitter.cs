@@ -63,7 +63,7 @@ internal class DataflowSplitter<TValue, TIndex>(SplitIndexHandle<TValue, TIndex>
                 for (var i = tasks.Length; i-- > 0;)
                     await tasks[i].ConfigureAwait(false);
             }
-            catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
+            catch (OperationCanceledException)
             {
                 break;
             }

@@ -18,7 +18,7 @@ internal sealed class DataflowPipe<TInput, TOutput>(Func<TInput, TOutput> mapper
             {
                 moveNext = await enumerator.MoveNextAsync().ConfigureAwait(false);
             }
-            catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
+            catch (OperationCanceledException)
             {
                 moveNext = false;
             }
